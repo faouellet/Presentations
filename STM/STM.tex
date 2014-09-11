@@ -1,0 +1,217 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[overlay,absolute]{textpos}
+\usepackage{adjustbox}
+
+\AtBeginSection[]
+{
+\begin{frame}<beamer>
+\frametitle{Plan}
+\tableofcontents[
+  currentsection,
+  sectionstyle=show/show,
+  subsectionstyle=hide
+]
+\end{frame}
+}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{teal}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cyan}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\setbeamercolor{normal text}{fg=white,bg=black!90}
+\setbeamercolor{structure}{fg=white}
+
+\setbeamercolor{alerted text}{fg=red!85!black}
+
+\setbeamercolor{item projected}{use=item,fg=black,bg=item.fg!35}
+
+\setbeamercolor*{palette primary}{use=structure,fg=structure.fg}
+\setbeamercolor*{palette secondary}{use=structure,fg=structure.fg!95!black}
+\setbeamercolor*{palette tertiary}{use=structure,fg=structure.fg!90!black}
+\setbeamercolor*{palette quaternary}{use=structure,fg=structure.fg!95!black,bg=black!80}
+
+\setbeamercolor*{framesubtitle}{fg=white}
+
+\setbeamercolor*{block title}{parent=structure,bg=black!60}
+\setbeamercolor*{block body}{fg=black,bg=black!10}
+\setbeamercolor*{block title alerted}{parent=alerted text,bg=black!15}
+\setbeamercolor*{block title example}{parent=example text,bg=black!15}
+
+\author[Félix-Antoine Ouellet]{Félix-Antoine Ouellet}
+
+\title[MTL\hspace{2em}\insertframenumber/\inserttotalframenumber]{Mémoire transactionnelle logicielle}
+
+\institute{Université de Sherbrooke}
+
+\date{Septembre 2014}
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\section{Motivation}
+\subsection{Programmation parallèle traditionnelle}
+
+\newlength\someheight
+\setlength\someheight{3.5cm}
+
+\begin{frame}[fragile]
+\frametitle{Programmation parallèle traditionnelle}
+\framesubtitle{Exemple}
+\begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
+\begin{lstlisting}
+class Account {
+public:
+  void deposit(int n) {
+    m_Mutex.lock();
+    m_Balance += n;
+    m_Mutex.unlock();
+  }
+
+  void withdraw(int n) {
+    m_Mutex.lock();
+    if (m_Balance >= n) {
+      m_Balance -= n;
+    }
+    m_Mutex.unlock();
+  }
+};
+\end{lstlisting}
+\end{adjustbox}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problèmes}
+\begin{itemize}
+\item Problèmes de synchronisation
+\item<2-> Coût des verrous
+\item<3-> Difficile à composer
+\item<4-> Penser parallèle
+\end{itemize}
+\end{frame}
+
+\section{Mémoire transactionnelle}
+\subsection{Concept}
+\begin{frame}
+\frametitle{Concept}
+\begin{itemize}
+\item Semblable aux transactions dans une base de données
+\end{itemize}
+\end{frame}
+
+\subsection{Avantages}
+\begin{frame}
+\frametitle{Avantages}
+
+\end{frame}
+
+\subsection{Problèmes potentiels}
+\begin{frame}
+\frametitle{Problèmes potentiels}
+\begin{itemize}
+\item Problèmes de performance
+\item<2-> Interactions avec code non-transactionnel
+\item<3-> Gestions des exceptions
+\end{itemize}
+\end{frame}
+
+\subsection{Possible implémentation}
+\begin{frame}
+\frametitle{Possible implémentation}
+
+\end{frame}
+
+\section{Support présent}
+\begin{frame}[fragile]
+\frametitle{Haskell}
+\begin{itemize}
+\item Existe déjà dans Concurrent Haskell
+\end{itemize}
+\lstset{language=Haskell,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{teal}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cyan}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+\begin{lstlisting}
+   credit :: Integer -> Account -> STM ()
+   credit amount account = do
+       current <- readTVar account
+       writeTVar account (current + amount)
+ 
+   debit :: Integer -> Account -> STM ()
+   debit amount account = do
+       current <- readTVar account
+       writeTVar account (current - amount)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{C++}
+\begin{itemize}
+\item Extension disponible dans GCC depuis GCC 4.7
+\end{itemize}
+\begin{lstlisting}
+    void func()
+    {
+      for (int i = 0; i < 100; ++i) {
+        __transaction_atomic {
+          ++a;
+          b += 2;
+          c = a + b;
+        }
+      }
+    }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{C++}
+\begin{itemize}
+\item En voie d'être standardisé pour C++17
+\end{itemize}
+\begin{lstlisting}
+    void func()
+    {
+      for (int i = 0; i < 100; ++i) {
+        atomic_noexcept {
+          ++a;
+          b += 2;
+          c = a + b;
+        }
+      }
+    }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+\frametitle{Matériel}
+\begin{itemize}
+\item Intel
+\begin{itemize}
+\item Haswell
+\item Extension TSX pour x86
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}
+\frametitle{Conclusion}
+
+\end{frame}
+
+\end{document}

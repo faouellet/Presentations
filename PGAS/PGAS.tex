@@ -52,7 +52,7 @@
 
 \institute{Université de Sherbrooke}
 
-\date{Septembre 2014}
+\date{2 octobre 2014}
 
 \begin{document}
 
@@ -85,13 +85,56 @@
 \subsection{État présent du logiciel}
 \begin{frame}
 \frametitle{Programmation parallèle avec mémoire partagée}
+\begin{center}
+\includegraphics[scale=0.6]{sharedmem.jpg}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Programmation parallèle avec mémoire partagée}
+\begin{minipage}[t]{0.5\linewidth}
+    \textbf{Avantages}:
+    \begin{itemize}
+    \item{aaa}
+    \end{itemize}
+    \end{minipage}%
+    \begin{minipage}[t]{0.5\linewidth}
+    \textbf{Inconvénients}:
+    \begin{itemize}
+    \item{Conditions de course}
+    \end{itemize}
+\end{minipage}
 \end{frame}
 
 \begin{frame}
 \frametitle{Programmation parallèle avec mémoire distribuée}
+\begin{center}
+\includegraphics[scale=0.6]{distributedmem.jpg}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Programmation parallèle avec mémoire distribué}
+\begin{minipage}[t]{0.5\linewidth}
+    \textbf{Avantages}:
+    \begin{itemize}
+    \item{Pas de conditions de course}
+    \end{itemize}
+    \end{minipage}%
+    \begin{minipage}[t]{0.5\linewidth}
+    \textbf{Inconvénients}:
+    \begin{itemize}
+    \item{Doit penser à la distribution des données}
+    \end{itemize}
+\end{minipage}
 \end{frame}
 
 \section{Espace d'addressage global partitionné}
+\begin{frame}
+\frametitle{}
+\end{frame}
+
+\section{Espace d'addressage global partitionné asynchrone}
 \begin{frame}
 \frametitle{}
 \end{frame}
@@ -110,7 +153,13 @@
 \framesubtitle{Présentation}
 \begin{itemize}
 \item Réponse de Cray au projet HPCS
+\item Inspiré de langage comme C, C++, C\#, Java, Fortran, HPF
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Chapel}
+\framesubtitle{Localité}
 \end{frame}
 
 \begin{frame}
@@ -119,20 +168,12 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{X10}
-\framesubtitle{Présentation}
-\begin{itemize}
-\item Réponse de IBM au projet HPCS
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{X10}
-\framesubtitle{Exemple}
+\frametitle{HPX}
 \end{frame}
 
 \begin{frame}
 \frametitle{HPX}
+\framesubtitle{Exemple}
 \end{frame}
 
 \section{Conclusion}

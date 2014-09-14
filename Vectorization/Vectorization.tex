@@ -10,6 +10,7 @@
 \usepackage[overlay,absolute]{textpos}
 \usepackage{tikz}
 \usetikzlibrary{arrows,shapes}
+\usepackage{amsfonts}
 
 
 \AtBeginSection[]
@@ -91,8 +92,9 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{Constat de l'industrie}
 \begin{center}
-\colorbox{white}{\includegraphics[scale=0.45]{CPU.png}}
+\colorbox{white}{\includegraphics[scale=0.4]{CPU.png}}
 \end{center}
 \end{frame}
 
@@ -210,8 +212,7 @@ for (int i = 0; i < 100; ++i) {
 }
 
 for (int i = 0; i < 100; ++i) {
-  A[i] = B[i] + C[i];
-  D[i] = A[i+1];
+  A[i+1] = A[i] + B[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -226,8 +227,7 @@ for (int i = 0; i < 100; ++i) {
 }
 
 for (int i = 0; i < 100; ++i) {
-  A[i] = B[i] + C[i];
-  D[i] = A[i+1];
+  A[i+1] = A[i] + B[i];
 }
 \end{lstlisting}
 
@@ -246,8 +246,7 @@ for (int i = 0; i < 100; ++i) {
 }
 
 for (int i = 0; i < 100; ++i) {
-  @\textcolor{yellow}{A[i] =}@ B[i] + C[i];
-  D[i] @\textcolor{yellow}{= A[i+1]}@;
+  @\textcolor{yellow}{A[i+1] = A[i]}@ + B[i];
 }
 \end{lstlisting}
 
@@ -261,46 +260,43 @@ for (int i = 0; i < 100; ++i) {
 \end{frame}
 
 \subsection{Analyse}
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Légalité}
 \framesubtitle{Parallélisation des instructions}
-\begin{itemize}
-\item Pas d'appels de fonctions
-\item Opération parallélisable
-\item Types des paramètres parallélisables
-\item Type de retour parallélisable
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Code Séquentiel}
-\framesubtitle{Somme des éléments de vecteurs}
 \begin{lstlisting}
 int reduction = 0;
-for (int i = 0; i < 100; ++i) {
+for (int i = 0; i < 100;
+     ++i) {
   reduction += A[i];
 }
 \end{lstlisting}
+
+\begin{textblock}{6}(9, 6)
+	\begin{itemize}
+	\item<2->[\checkmark] Pas d'appels de fonctions
+	\item<3->[\checkmark] Opération parallélisable
+	\item<4->[\checkmark] Types des paramètres parallélisables
+	\item<5->[\checkmark] Type de retour parallélisable
+	\end{itemize}
+\end{textblock}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Légalité}
 \framesubtitle{Parallélisation de la mémoire}
-\begin{itemize}
-\item Chevauchement d'accès mémoire
-\item Présence de dépendence(s) mémoire
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Code Séquentiel}
-\framesubtitle{Somme des éléments de vecteurs}
 \begin{lstlisting}
 int reduction = 0;
 for (int i = 0; i < 100; ++i) {
   reduction += A[i];
 }
 \end{lstlisting}
+
+\begin{textblock}{6}(9, 10)
+	\begin{itemize}
+	\item<2->[\checkmark] Pas de chevauchement d'accès mémoire
+	\item<3->[$\times$] Présence de dépendences mémoire
+	\end{itemize}
+\end{textblock}
 \end{frame}
 
 \begin{frame}
@@ -327,12 +323,12 @@ for (int i = 0; i < 100; ++i) {
 \end{itemize}
 \end{frame}
 
-\subsection{Transformation}
+\subsection{Transformations}
 \begin{frame}
 \frametitle{Reconnaissance d'idiomes}
 \framesubtitle{Théorie}
 \begin{itemize}
-\item But: Identifier une situation connue
+\item But: Agir en présence d'une situation connue
 \item Exemples:
 \begin{itemize}
 \item Induction
@@ -492,7 +488,7 @@ void foo(int a1, int a2, int b1, int b2, int *A)
 \frametitle{Conclusion}
 \begin{itemize}
 \item L'autovectorization c'est bien, mais c'est limité
-\item L'architecture change donc la technologie change
+\item L'architecture change donc la programmation doit changer
 \end{itemize}
 \end{frame}
 

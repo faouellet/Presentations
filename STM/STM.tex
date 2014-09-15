@@ -14,7 +14,6 @@
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  sectionstyle=show/show,
   subsectionstyle=hide
 ]
 \end{frame}
@@ -53,12 +52,16 @@
 
 \institute{Université de Sherbrooke}
 
-\date{Septembre 2014}
+\date{23 octobre 2014}
 
 \begin{document}
 
 \begin{frame}
 \titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\tableofcontents[hideallsubsections]
 \end{frame}
 
 \section{Motivation}
@@ -134,6 +137,7 @@ public:
 \end{frame}
 
 \section{Support présent}
+\subsection{Langages de programmation}
 \begin{frame}[fragile]
 \frametitle{Haskell}
 \begin{itemize}
@@ -197,15 +201,12 @@ public:
 \end{lstlisting}
 \end{frame}
 
+\subsection{Matériel}
 \begin{frame}
 \frametitle{Matériel}
-\begin{itemize}
-\item Intel
-\begin{itemize}
-\item Haswell
-\item Extension TSX pour x86
-\end{itemize}
-\end{itemize}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.15]{haswell.jpg}}
+\end{center}
 \end{frame}
 
 \section{Conclusion}

@@ -7,13 +7,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage[overlay,absolute]{textpos}
 
+
 \AtBeginSection[]
 {
 \begin{frame}<beamer>
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  sectionstyle=show/show,
   subsectionstyle=hide
 ]
 \end{frame}
@@ -60,6 +60,10 @@
 \titlepage % Print the title page as the first slide
 \end{frame}
 
+\begin{frame}
+\tableofcontents[hideallsubsections]
+\end{frame}
+
 \section{Motivation}
 \subsection{État présent du matériel}
 \begin{frame}
@@ -86,7 +90,7 @@
 \begin{frame}
 \frametitle{Programmation parallèle avec mémoire partagée}
 \begin{center}
-\includegraphics[scale=0.6]{sharedmem.jpg}
+\includegraphics[scale=3]{shared.png}
 \end{center}
 \end{frame}
 
@@ -95,13 +99,15 @@
 \begin{minipage}[t]{0.5\linewidth}
     \textbf{Avantages}:
     \begin{itemize}
-    \item{aaa}
+    \item{Raisonnement plus facile}
+    \item{Unique espace d'addressage}
     \end{itemize}
     \end{minipage}%
     \begin{minipage}[t]{0.5\linewidth}
     \textbf{Inconvénients}:
     \begin{itemize}
     \item{Conditions de course}
+    \item{N'échelonne pas bien}
     \end{itemize}
 \end{minipage}
 \end{frame}
@@ -109,7 +115,7 @@
 \begin{frame}
 \frametitle{Programmation parallèle avec mémoire distribuée}
 \begin{center}
-\includegraphics[scale=0.6]{distributedmem.jpg}
+\includegraphics[scale=3]{distributed.png}
 \end{center}
 \end{frame}
 
@@ -118,6 +124,7 @@
 \begin{minipage}[t]{0.5\linewidth}
     \textbf{Avantages}:
     \begin{itemize}
+    \item{S'échelonne bien}
     \item{Pas de conditions de course}
     \end{itemize}
     \end{minipage}%
@@ -125,6 +132,7 @@
     \textbf{Inconvénients}:
     \begin{itemize}
     \item{Doit penser à la distribution des données}
+    \item{Performance lié au réseau}
     \end{itemize}
 \end{minipage}
 \end{frame}
@@ -132,6 +140,9 @@
 \section{Espace d'addressage global partitionné}
 \begin{frame}
 \frametitle{}
+\begin{center}
+\includegraphics[scale=3]{pgas.png}
+\end{center}
 \end{frame}
 
 \section{Espace d'addressage global partitionné asynchrone}

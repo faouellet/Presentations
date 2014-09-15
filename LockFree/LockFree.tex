@@ -6,6 +6,8 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[overlay,absolute]{textpos}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
 
 \AtBeginSection[]
 {
@@ -13,7 +15,6 @@
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  sectionstyle=show/show,
   subsectionstyle=hide
 ]
 \end{frame}
@@ -52,7 +53,7 @@
 
 \institute{Université de Sherbrooke}
 
-\date{Septembre 2014}
+\date{16 octobre 2014}
 
 \begin{document}
 
@@ -60,12 +61,276 @@
 \titlepage % Print the title page as the first slide
 \end{frame}
 
+\begin{frame}
+\tableofcontents[hideallsubsections]
+\end{frame}
+
 \section{Motivation}
 
+\section{Définition}
+\begin{frame}
+\frametitle{Définitions}
+Il existe diverses définitions selon le niveau de garanties fourni.
+\begin{itemize}
+\item Sans attente
+\item Sans verrous
+\item Sans obstruction
+\end{itemize}
+\end{frame}
+
+\defverbatim{\Wait}{%
+\begin{lstlisting}
+void IncrementRefCounter(Object *obj)
+{
+    atomic_increment(obj->rc);
+}
+\end{lstlisting}}
+
+\subsection{Sans attente}
+\begin{frame}[fragile]
+\frametitle{Sans attente}
+Chaque fil d'exécution s'exécute dans un nombre fini d'étapes sans égard pour des facteurs externes.
+
+\only<2>{
+Exemple:
+\Wait
+}
+\end{frame}
+
+\defverbatim{\Lock}{%
+\begin{lstlisting}
+void StackPush(Stack *s, Node *n) {
+  Node* head;
+  do {
+    head = s->head;
+    n->next = head;
+  }
+  while (!CompareExchange(s->head, head, n));
+}
+\end{lstlisting}}
+
+\subsection{Sans verrous}
+\begin{frame}[fragile]
+\frametitle{Sans verrous}
+Le système en entier va continuer de progresser malgré que certains fils d'exécution ne progressent pas.
+
+\only<2>{
+Exemple:
+\Lock
+}
+\end{frame}
+
+\defverbatim{\Obs}{%
+\begin{lstlisting}
+?
+\end{lstlisting}}
+
+\subsection{Sans obstruction}
+\begin{frame}[fragile]
+\frametitle{Sans obstruction}
+Un fil d'exécution exécuter en isolation va terminer dans un nombre fini d'étapes.
+
+\only<2>{
+Exemple:
+\Obs
+}
+\end{frame}
+
+\section{Techniques}
+\subsection{Read-Copy-Update}
+\begin{frame}
+\frametitle{Read-Copy-Update}
+\end{frame}
+
+\subsection{Compare-And-Swap}
+\begin{frame}[fragile]
+\frametitle{Compare-And-Swap}
+\framesubtitle{Haut niveau}
+\begin{lstlisting}
+int CompareAndSwap(int *reg, int oldVal,
+                   int newVal) {
+  int r = *reg;
+  if (*reg == oldVal)
+      *reg = newVal;
+  return r;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Compare-And-Swap}
+\framesubtitle{Pratique}
+\begin{lstlisting}
+void LockFreeQueue::push(Node *newHead) {
+  for (;;) {
+    Node *oldHead = m_Head;
+    newHead->next = oldHead;
+    if (CompareAndSwap(&m_Head, newHead, 
+                       oldHead) == oldHead)
+      return;
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Compare-And-Swap}
+\framesubtitle{Assembleur}
+\begin{center}
+\Huge CMPXCHG
+\end{center}
+\end{frame}
+
+\subsection{Problème ABA}
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Description}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Code}
+\begin{lstlisting}
+void LockFreeQueue::push(Node *newHead) {
+  for (;;) {
+    Node *oldHead = m_Head;
+    newHead->next = oldHead;
+    if (CompareAndSwap(&m_Head, newHead, 
+                       oldHead) == oldHead)
+      return;
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Exécution}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node] (1) {1};
+  \node[main node] (2) [right of=1] {2};
+  \node[main node] (3) [right of=2] {3};
+  \node[main node] (4) [right of=3] {4};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (2)
+    (2) edge node [right] {} (3)
+        edge node [left] {} (1)
+    (3) edge node [right] {} (4)
+    	edge node [left] {} (2)
+    (4) edge node [left] {} (3);
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Exécution}
+\textcolor{red}{Thread 1}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node] (1) {1};
+  \node[main node] (2) [right of=1] {2};
+  \node[main node] (3) [right of=2] {3};
+  \node[main node] (4) [right of=3] {4};
+  \node[main node, draw=red] (T1) [above of=1] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (2)
+    (2) edge node [right] {} (3)
+        edge node [left] {} (1)
+    (3) edge node [right] {} (4)
+    	edge node [left] {} (2)
+    (4) edge node [left] {} (3)
+    (T1) edge node [->, thick] {} (1);
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Exécution}
+\textcolor{red}{Thread 1}  \textcolor{green}{Thread 2}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node] (2) [right of=1] {2};
+  \node[main node] (3) [right of=2] {3};
+  \node[main node] (4) [right of=3] {4};
+  \node[main node, draw=red] (T1) [above of=1] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (2) edge node [right] {} (3)
+    (3) edge node [right] {} (4)
+    	edge node [left] {} (2)
+    (4) edge node [left] {} (3)
+    (T1) edge node [->, thick] {\color{red} f} (1);
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Exécution}
+\textcolor{red}{Thread 1} \textcolor{green}{Thread 2}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node] (3) [right of=2] {3};
+  \node[main node] (4) [right of=3] {4};
+  \node[main node, draw=red] (T1) [above of=1] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (3) edge node [right] {} (4)
+    (4) edge node [left] {} (3)
+    (T1) edge node [->, thick] {\color{red} f} (1);
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Exemple - Exécution}
+\textcolor{red}{Thread 1} \textcolor{green}{Thread 2}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node] (1) {1};
+  \node[main node] (3) [right of=1] {3};
+  \node[main node] (4) [right of=3] {4};
+  \node[main node, draw=red] (T1) [above of=1] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (3)
+    (3) edge node [right] {} (4)
+    	edge node [left] {} (1)
+    (4) edge node [left] {} (3)
+    (T1) edge node [->, thick] {\color{red} f} (1);
+\end{tikzpicture}
+\end{frame}
+
+\section{Modèle mémoire}
+\subsection{Réordonnancement mémoire}
+\begin{frame}
+\frametitle{Réordonnancement mémoire}
+\textbf{Pourquoi?}
+\begin{itemize}
+\item<2-> Compilateur
+\item<3-> Processeur
+\end{itemize}
+\end{frame}
+
+\subsection{Consistence séquentielle}
+\begin{frame}
+\frametitle{Consistence séquentielle}
+\end{frame}
 
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
+\begin{itemize}
+\item On jongle avec des lames de rasoir
+\item<2-> Il faut connaître ses outils logiciels et matériels
+\end{itemize}
 \end{frame}
 
 \end{document}

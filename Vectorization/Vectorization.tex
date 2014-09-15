@@ -294,7 +294,7 @@ for (int i = 0; i < 100; ++i) {
 \begin{textblock}{6}(9, 10)
 	\begin{itemize}
 	\item<2->[\checkmark] Pas de chevauchement d'accès mémoire
-	\item<3->[$\times$] Présence de dépendences mémoire
+	\item<3->[\checkmark] Pas de dépendences mémoire
 	\end{itemize}
 \end{textblock}
 \end{frame}
@@ -488,7 +488,7 @@ void foo(int a1, int a2, int b1, int b2, int *A)
 \frametitle{Conclusion}
 \begin{itemize}
 \item L'autovectorization c'est bien, mais c'est limité
-\item L'architecture change donc la programmation doit changer
+\item<2-> L'architecture change donc la programmation doit changer
 \end{itemize}
 \end{frame}
 

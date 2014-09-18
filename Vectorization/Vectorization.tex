@@ -19,7 +19,7 @@
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  subsectionstyle=hide
+  hideothersubsections
 ]
 \end{frame}
 }
@@ -120,9 +120,9 @@
 \frametitle{Code Séquentiel}
 \framesubtitle{Somme des éléments de vecteurs}
 \begin{lstlisting}
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 100; ++i) {
-  reduction += A[i];
+  somme += A[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -131,23 +131,29 @@ for (int i = 0; i < 100; ++i) {
 \frametitle{Code Vectoriel}
 \framesubtitle{Somme des éléments de vecteurs}
 \begin{lstlisting}
-int reductionTab[] = { 0, 0 };
+int sommeTab[] = { 0, 0 };
 for (int i = 0; i < 100; i+=8) {
-  reductionTab[0] += A[i:i+3]; 
-  reductionTab[1] += A[i+4:i+7];
+  sommeTab[0] += A[i:i+3]; 
+  sommeTab[1] += A[i+4:i+7];
 }
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 2; ++i) {
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 for (int i = 96; i < 100; ++i) {
-  reduction += A[i];
+  somme += A[i];
 }
 \end{lstlisting}
 \end{frame}
 
 \section{Procédure}
-\subsection{Dépendences}
+\subsection{Notions de base}
+\begin{frame}
+\frametitle{Notions de base}
+\framesubtitle{Dépendence mémoire}
+Situation dans laquelle deux instructions accèdent à la même donnée.
+\end{frame}
+
 \begin{frame}[fragile]
 \frametitle{Notions de base}
 \framesubtitle{Classification des dépendences mémoire}
@@ -264,10 +270,10 @@ for (int i = 0; i < 100; ++i) {
 \frametitle{Légalité}
 \framesubtitle{Parallélisation des instructions}
 \begin{lstlisting}
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 100;
      ++i) {
-  reduction += A[i];
+  somme += A[i];
 }
 \end{lstlisting}
 
@@ -285,16 +291,16 @@ for (int i = 0; i < 100;
 \frametitle{Légalité}
 \framesubtitle{Parallélisation de la mémoire}
 \begin{lstlisting}
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 100; ++i) {
-  reduction += A[i];
+  somme += A[i];
 }
 \end{lstlisting}
 
 \begin{textblock}{6}(9, 10)
 	\begin{itemize}
 	\item<2->[\checkmark] Pas de chevauchement d'accès mémoire
-	\item<3->[\checkmark] Pas de dépendences mémoire
+	\item<3->[$\times$] Pas de dépendences mémoire
 	\end{itemize}
 \end{textblock}
 \end{frame}
@@ -341,14 +347,14 @@ for (int i = 0; i < 100; ++i) {
 \frametitle{Reconnaissance d'idiomes}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-int reduction = 0;
-int reductionTab[2];
+int somme = 0;
+int sommeTab[2];
 for (int i = 0; i < 2; ++i) {
-  reductionTab[i] = 0;
+  sommeTab[i] = 0;
   for (int j = i; j < 100; j+=2) {
-    reductionTab[i] += A[j];
+    sommeTab[i] += A[j];
   }
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -366,15 +372,15 @@ for (int i = 0; i < 2; ++i) {
 \frametitle{Distribution de boucle}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-int reductionTab[] = { 0, 0 };
+int sommeTab[] = { 0, 0 };
 for (int i = 0; i < 2; ++i) {
   for (int j = i; j < 100; j+=2) {
-    reductionTab[i] += A[j];
+    sommeTab[i] += A[j];
   }
 }
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 2; ++i) {
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -383,7 +389,7 @@ for (int i = 0; i < 2; ++i) {
 \frametitle{Inter-échange de boucles}
 \framesubtitle{Théorie}
 \begin{itemize}
-\item But: Optimiser la localité de référence
+\item But: Optimiser les accès mémoire et exposer du parallélisme
 \item Moyen : Échanger les variables d'induction des boucles ciblées
 \end{itemize}
 \end{frame}
@@ -392,15 +398,15 @@ for (int i = 0; i < 2; ++i) {
 \frametitle{Inter-échange de boucles}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-int reductionTab[] = { 0, 0 };
+int sommeTab[] = { 0, 0 };
 for (int j = 0; j < 100; j+=2) {
   for (int i = j; i < min(j+2, 100); ++i) {
-     reductionTab[i-j] += A[j];
+     sommeTab[i-j] += A[j+i];
   }
 }
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 2; ++i) {
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -418,15 +424,15 @@ for (int i = 0; i < 2; ++i) {
 \frametitle{Vectorization}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-int reductionTab[] = { 0, 0 };
-for (int j = 0; j < 100; j+=2) {
+int sommeTab[] = { 0, 0 };
+for (int j = 0; j < 100; j+=4) {
   for (int i = j; i < min(j+2, 100); ++i) {
-    reductionTab[i-j] += A[j:j+3];
+    sommeTab[i-j] += A[j:j+3];
   }
 }
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 2; ++i) {
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -445,17 +451,17 @@ for (int i = 0; i < 2; ++i) {
 \frametitle{Déroulage de boucle}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-int reductionTab[] = { 0, 0 };
+int sommeTab[] = { 0, 0 };
 for (int i = 0; i < 100; i+=8) {
-  reductionTab[0] += A[i:i+3]; 
-  reductionTab[1] += A[i+4:i+7];
+  sommeTab[0] += A[i:i+3]; 
+  sommeTab[1] += A[i+4:i+7];
 }
-int reduction = 0;
+int somme = 0;
 for (int i = 0; i < 2; ++i) {
-  reduction += reductionTab[i];
+  somme += sommeTab[i];
 }
 for (int i = 96; i < 100; ++i) {
-  reduction += A[i];
+  somme += A[i];
 }
 \end{lstlisting}
 \end{frame}
@@ -465,7 +471,7 @@ for (int i = 96; i < 100; ++i) {
 \begin{frame}[fragile]
 \frametitle{Pointeurs}
 \begin{lstlisting}
-void bar(float *A, float* B, float K, int n) {
+void bar(float *A, float *B, float K, int n) {
   for (int i = 0; i < n; ++i)
     A[i] *= B[i] + K;
 }
@@ -475,8 +481,8 @@ void bar(float *A, float* B, float K, int n) {
 \begin{frame}[fragile]
 \frametitle{\textit{Superword Level Parallelism}}
 \begin{lstlisting}
-void foo(int a1, int a2, int b1, int b2, int *A) 
-{
+void foo(int a1, int a2, 
+         int b1, int b2, int *A) {
   A[0] = a1*(a1 + b1)/b1 + 50*b1/a1;
   A[1] = a2*(a2 + b2)/b2 + 50*b2/a2;
 }
@@ -487,8 +493,9 @@ void foo(int a1, int a2, int b1, int b2, int *A)
 \begin{frame}
 \frametitle{Conclusion}
 \begin{itemize}
-\item L'autovectorization c'est bien, mais c'est limité
-\item<2-> L'architecture change donc la programmation doit changer
+\item Trois grandes étapes
+\item<2-> L'autovectorization c'est bien, mais c'est limité
+\item<3-> L'architecture change donc la programmation doit changer
 \end{itemize}
 \end{frame}
 

@@ -6,7 +6,7 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[overlay,absolute]{textpos}
-
+\usepackage{amsfonts}
 
 \AtBeginSection[]
 {
@@ -14,17 +14,18 @@
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  subsectionstyle=hide
+  hideothersubsections
 ]
 \end{frame}
 }
 
 \lstset{language=C++,
                 basicstyle=\ttfamily,
-                keywordstyle=\color{teal}\ttfamily,
+                keywordstyle=\color{green}\ttfamily,
                 stringstyle=\color{red}\ttfamily,
                 commentstyle=\color{cyan}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#}
+                morecomment=[l][\color{magenta}]{\#},
+                escapechar=@
 }
 
 \setbeamercolor{normal text}{fg=white,bg=black!90}
@@ -68,21 +69,22 @@
 \subsection{État présent du matériel}
 \begin{frame}
 \frametitle{Explosion de parallélisme}
-\framesubtitle{Superordinateurs}
-\begin{itemize}
-\item Aux portes de l'\textit{exascale computing}
-\item $10^{18}$ opérations en virgule flottante par seconde
-\item Potentiellement 1 milliard de \textit{threads} à gérer simultanément
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Explosion de parallélisme}
 \framesubtitle{Appareils courants}
 \begin{itemize}
 \item Processeurs vectoriels
 \item Processeurs multi-coeurs
 \item Accélérateurs
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Explosion de parallélisme}
+\framesubtitle{Superordinateurs}
+\begin{itemize}
+\item Aux portes de l'\textit{exascale computing}
+\item<2-> $10^{18}$ opérations en virgule flottante par seconde
+\item<3-> Potentiellement 1 milliard de \textit{threads} à gérer simultanément
+\item<4-> Pas nécessairement utiliser par des informaticiens
 \end{itemize}
 \end{frame}
 
@@ -137,17 +139,140 @@
 \end{minipage}
 \end{frame}
 
+\begin{frame}
+\frametitle{Programmation parallèle}
+\begin{itemize}
+\item Des abstractions de trop bas niveau nuisent à la productivité
+\item Des abstractions de trop haut niveau nuisent à la performance
+\end{itemize}
+\end{frame}
+
 \section{Espace d'addressage global partitionné}
 \begin{frame}
-\frametitle{}
+\frametitle{Espace d'addressage global partitionné}
 \begin{center}
 \includegraphics[scale=3]{pgas.png}
 \end{center}
 \end{frame}
 
-\section{Espace d'addressage global partitionné asynchrone}
+\subsection{Programmation à haut niveau}
 \begin{frame}
-\frametitle{}
+\frametitle{Programmation à haut niveau}
+\begin{itemize}
+\item L'espace d'addressage apparaît unifié
+\item Peu de notions de parallélisme
+\item Le compilateur s'occupe de faire marcher le tout
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Programmation à haut niveau}
+\framesubtitle{Exemple}
+\begin{lstlisting}
+Vector<int> Add(Vector<int> A, 
+                Vector<int> B) {
+  Vector<int> C;
+  @\textcolor{green}{parfor}@(int i = 0; i < 100000000; ++i)
+    C[i] = A[i] + B[i];  
+  
+  return C;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+\frametitle{Programmation à haut niveau}
+\begin{itemize}
+\item Pas nécessairement la version optimale qui sera produite
+\item Par contre, il s'agit de la version qui maximise la productivité
+\end{itemize}
+\end{frame}
+
+\subsection{Localité}
+\begin{frame}
+\frametitle{Localité}
+\begin{itemize}
+\item Faire la distinction entre ce qui est global et ce qui est local
+\item Contrôler la distribution des données
+\begin{itemize}
+\item<2-> Profiter des hiérarchies mémoire modernes
+\item<2-> Profiter de divers types de processeurs
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Localité}
+\framesubtitle{Code}
+\begin{lstlisting}
+@\textcolor{green}{global}@ Vector<int> Vec;
+@\textcolor{green}{global}@ int TotalSum
+/*...*/
+for(int i = 0; i < nbLocales(); ++i) {
+  do @\textcolor{green}{on}@ Locale[i] {
+    int PartialSum = 0;
+    for(int j = 0; j < ; ++j)
+       PartialSum += Vec[j];
+    TotalSum += PartialSum;
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\subsection{Tâches}
+\begin{frame}
+\frametitle{Tâches}
+\framesubtitle{Les bases}
+\begin{itemize}
+\item Ensemble d'instructions à exécuter
+\item Repose sur un \textit{thread pool}
+\item Possiblement lié à une localité
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tâches}
+\framesubtitle{Les bases}
+\begin{lstlisting}
+void Func() {
+  int Res = CalculComplexe(@\textcolor{green}{this\_locale}@.ID);
+  print("Resultat:", Res);
+}
+
+for(int j = 0; j < nbLocales(); ++j) {
+  do @\textcolor{green}{on}@ Locale[j] {
+    Func();
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tâches}
+\framesubtitle{Fonctionnalités avancées}
+\begin{itemize}
+\item Exploiter le calcul asynchrone
+\item Créer dynamiquement des tâches
+\item Invoquer des tâches situées sur une autre localité
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tâches}
+\framesubtitle{Fonctionnalités avancées}
+\begin{lstlisting}
+void Func() {
+  int Res = 0;
+  @\textcolor{green}{parfor}@(int i = 0; i < 100; ++i)
+    Res += CalculComplexe(@\textcolor{green}{this\_locale}@.ID);
+  println("Locale:", @\textcolor{green}{this\_locale}@.ID);
+  println("Resultat:", Res);
+}
+do @\textcolor{green}{on}@ Locale[3] {
+    @\textcolor{green}{async}@ Func();
+}
+println("Locale:", @\textcolor{green}{this\_locale}@.ID);
+\end{lstlisting}
 \end{frame}
 
 \section{Implémentation}
@@ -168,28 +293,34 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Chapel}
-\framesubtitle{Localité}
+\framesubtitle{Exemple - Calcul de PI}
+\begin{lstlisting}
+const numRect = 10000000;
+const D : domain(1) = 1..numRect;
+const width = 2.0 / numRect;
+const baseX = -1 - width/2;
+@\textcolor{green}{proc}@ rectangleArea(i : int) {
+  const x = baseX + i*width;
+  return width * sqrt(1.0 - x*x);
+}
+@\textcolor{green}{var}@ halfPI : @\textcolor{green}{real}@;
+for i in D {
+  halfPI += rectangleArea(i);
+}
+writeln("Result:",2*halfPI);  
+\end{lstlisting}
 \end{frame}
 
-\begin{frame}
-\frametitle{Chapel}
-\framesubtitle{Exemple}
-\end{frame}
-
-\begin{frame}
-\frametitle{HPX}
-\end{frame}
-
-\begin{frame}
-\frametitle{HPX}
-\framesubtitle{Exemple}
-\end{frame}
 
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
+\begin{itemize}
+\item Les nouveaux défis en calcul de haute performance demande de nouvelles réponses
+\item<2-> L'avènement de l'ère multi-coeurs va forcer les langages de programmation à évoluer
+\end{itemize}
 \end{frame}
 
 \end{document}

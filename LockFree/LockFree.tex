@@ -15,17 +15,18 @@
 \frametitle{Plan}
 \tableofcontents[
   currentsection,
-  subsectionstyle=hide
+  hideothersubsections
 ]
 \end{frame}
 }
 
 \lstset{language=C++,
                 basicstyle=\ttfamily,
-                keywordstyle=\color{teal}\ttfamily,
+                keywordstyle=\color{green}\ttfamily,
                 stringstyle=\color{red}\ttfamily,
                 commentstyle=\color{cyan}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#}
+                morecomment=[l][\color{magenta}]{\#},
+                escapechar=@
 }
 
 \setbeamercolor{normal text}{fg=white,bg=black!90}
@@ -66,6 +67,31 @@
 \end{frame}
 
 \section{Motivation}
+\subsection{Programmation parallèle traditionnelle}
+\begin{frame}[fragile]
+\frametitle{Programmation parallèle traditionnelle}
+\framesubtitle{Exemple}
+\begin{lstlisting}
+void ThreadSafeIntStack::push(int val) {
+  std::lock_guard<std::mutex> lock(m_Mutex);
+  m_Stack.push(val);
+}
+
+int ThreadSafeIntStack::pop() {
+  std::lock_guard<std::mutex> lock(m_Mutex);
+  m_Stack.pop();
+}
+\end{lstlisting}
+\end{frame}
+
+\subsection{Problèmes}
+\begin{frame}
+\frametitle{Problèmes}
+\begin{itemize}
+\item Coût des verrous
+\item Inversion de priorités
+\end{itemize}
+\end{frame}
 
 \section{Définition}
 \begin{frame}
@@ -80,8 +106,7 @@ Il existe diverses définitions selon le niveau de garanties fourni.
 
 \defverbatim{\Wait}{%
 \begin{lstlisting}
-void IncrementRefCounter(Object *obj)
-{
+void IncrementRefCounter(Object *obj) {
     atomic_increment(obj->rc);
 }
 \end{lstlisting}}
@@ -137,9 +162,25 @@ Exemple:
 \end{frame}
 
 \section{Techniques}
-\subsection{Read-Copy-Update}
+\subsection{Read-Modify-Write}
 \begin{frame}
-\frametitle{Read-Copy-Update}
+\frametitle{Read-Modify-Write}
+\framesubtitle{Haut niveau}
+\begin{itemize}
+\item Classe d'opérations atomiques
+\item Souvent utilisé pour implémenter des mutex
+\item Exécute une lecture et une écriture
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Read-Modify-Write}
+\framesubtitle{Opérations}
+\begin{itemize}
+\item Test-And-Set
+\item Fetch-And-Add
+\item Compare-And-Swap
+\end{itemize}
 \end{frame}
 
 \subsection{Compare-And-Swap}
@@ -159,9 +200,17 @@ int CompareAndSwap(int *reg, int oldVal,
 
 \begin{frame}[fragile]
 \frametitle{Compare-And-Swap}
+\framesubtitle{Assembleur}
+\begin{center}
+\Huge CMPXCHG
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Compare-And-Swap}
 \framesubtitle{Pratique}
 \begin{lstlisting}
-void LockFreeQueue::push(Node *newHead) {
+void LockFreeList::PushFront(Node *newHead) {
   for (;;) {
     Node *oldHead = m_Head;
     newHead->next = oldHead;
@@ -173,25 +222,18 @@ void LockFreeQueue::push(Node *newHead) {
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Compare-And-Swap}
-\framesubtitle{Assembleur}
-\begin{center}
-\Huge CMPXCHG
-\end{center}
-\end{frame}
-
 \subsection{Problème ABA}
 \begin{frame}
 \frametitle{Problème ABA}
-\framesubtitle{Description}
+\framesubtitle{Description sommaire}
+Modifications par un fil d'exécution à une structure partagée dont les autres fils d'exécution n'ont pas connaissance.
 \end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Problème ABA}
 \framesubtitle{Exemple - Code}
 \begin{lstlisting}
-void LockFreeQueue::push(Node *newHead) {
+void LockFreeList::PushFront(Node *newHead) {
   for (;;) {
     Node *oldHead = m_Head;
     newHead->next = oldHead;
@@ -227,7 +269,13 @@ void LockFreeQueue::push(Node *newHead) {
 \begin{frame}
 \frametitle{Problème ABA}
 \framesubtitle{Exemple - Exécution}
-\textcolor{red}{Thread 1}
+\begin{textblock}{5}(5, 5)
+	 Thread 1 \\
+	 PushFront();
+\end{textblock}
+\begin{textblock}{5}(10, 5)
+	 \textcolor{gray}{Thread 2} \\
+\end{textblock}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
@@ -235,7 +283,7 @@ void LockFreeQueue::push(Node *newHead) {
   \node[main node] (2) [right of=1] {2};
   \node[main node] (3) [right of=2] {3};
   \node[main node] (4) [right of=3] {4};
-  \node[main node, draw=red] (T1) [above of=1] {};
+  \node[main node, label=right:oldHead] (T1) [above of=1] {};
 
   \path[every node/.style={font=\sffamily\small}]
     (1) edge node [right] {} (2)
@@ -251,77 +299,169 @@ void LockFreeQueue::push(Node *newHead) {
 \begin{frame}
 \frametitle{Problème ABA}
 \framesubtitle{Exemple - Exécution}
-\textcolor{red}{Thread 1}  \textcolor{green}{Thread 2}
+\begin{textblock}{5}(5, 5)
+	 \textcolor{gray}{Thread 1} \\
+	 \textcolor{gray}{PushFront();}
+\end{textblock}
+\begin{textblock}{5}(10, 5)
+	 Thread 2 \\
+	 PopFront(); \\
+\end{textblock}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
   \node[main node] (2) [right of=1] {2};
   \node[main node] (3) [right of=2] {3};
   \node[main node] (4) [right of=3] {4};
-  \node[main node, draw=red] (T1) [above of=1] {};
+  \node[main node, label=right:\textcolor{gray}{oldHead}, draw=gray] (T1) [above of=1] {};
 
   \path[every node/.style={font=\sffamily\small}]
     (2) edge node [right] {} (3)
     (3) edge node [right] {} (4)
     	edge node [left] {} (2)
     (4) edge node [left] {} (3)
-    (T1) edge node [->, thick] {\color{red} f} (1);
+    (T1) edge [->, thick, draw=gray] node {} (1);
 \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
 \frametitle{Problème ABA}
 \framesubtitle{Exemple - Exécution}
-\textcolor{red}{Thread 1} \textcolor{green}{Thread 2}
+\begin{textblock}{5}(5, 5)
+	 \textcolor{gray}{Thread 1} \\
+	 \textcolor{gray}{PushFront();}
+\end{textblock}
+\begin{textblock}{5}(10, 5)
+	 Thread 2 \\
+	 PopFront(); \\
+	 PopFront(); \\
+\end{textblock}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
   \node[main node] (3) [right of=2] {3};
   \node[main node] (4) [right of=3] {4};
-  \node[main node, draw=red] (T1) [above of=1] {};
+  \node[main node, label=right:\textcolor{gray}{oldHead}, draw=gray] (T1) [above of=1] {};
 
   \path[every node/.style={font=\sffamily\small}]
     (3) edge node [right] {} (4)
     (4) edge node [left] {} (3)
-    (T1) edge node [->, thick] {\color{red} f} (1);
+    (T1) edge [->, thick, draw=gray] node {} (1);
 \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
 \frametitle{Problème ABA}
 \framesubtitle{Exemple - Exécution}
-\textcolor{red}{Thread 1} \textcolor{green}{Thread 2}
+\begin{textblock}{5}(5, 5)
+	 \textcolor{gray}{Thread 1} \\
+	 \textcolor{gray}{PushFront();}
+\end{textblock}
+\begin{textblock}{5}(10, 5)
+	 Thread 2 \\
+	 PopFront(); \\
+	 PopFront(); \\
+	 PushFront(node1);
+\end{textblock}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
   \node[main node] (1) {1};
   \node[main node] (3) [right of=1] {3};
   \node[main node] (4) [right of=3] {4};
-  \node[main node, draw=red] (T1) [above of=1] {};
+  \node[main node, label=right:\textcolor{gray}{oldHead}, draw=gray] (T1) [above left of=1] {};
 
   \path[every node/.style={font=\sffamily\small}]
     (1) edge node [right] {} (3)
     (3) edge node [right] {} (4)
     	edge node [left] {} (1)
     (4) edge node [left] {} (3)
-    (T1) edge node [->, thick] {\color{red} f} (1);
+    (T1) edge [->, thick, draw=gray] node {} (1);
 \end{tikzpicture}
 \end{frame}
 
 \section{Modèle mémoire}
-\subsection{Réordonnancement mémoire}
+\subsection{Modèle mémoire}
 \begin{frame}
-\frametitle{Réordonnancement mémoire}
-\textbf{Pourquoi?}
+\frametitle{Modèle mémoire}
 \begin{itemize}
-\item<2-> Compilateur
-\item<3-> Processeur
+\item Existe au niveau du langage et du processeur
+\item Décrit l'interaction possible entre fils d'exécution
+\begin{itemize}
+\item Atomicité
+\item Visibilité
+\item Ordonnancement
+\end{itemize}
 \end{itemize}
 \end{frame}
 
-\subsection{Consistence séquentielle}
-\begin{frame}
-\frametitle{Consistence séquentielle}
+\subsection{Visibilité}
+\begin{frame}[fragile]
+\frametitle{Visibilité}
+\framesubtitle{Problème}
+\begin{lstlisting}
+// Processeur #1
+while (f) {
+  print x;
+}
+
+// Processeur #2
+x = 42;
+f = false;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Visibilité}
+\framesubtitle{Solution}
+\begin{lstlisting}
+// Processeur #1
+while (f);
+WriteMemoryBarrier();
+print x;
+
+// Processeur #2
+x = 42;
+WriteMemoryBarrier();
+f = false;
+\end{lstlisting}
+\end{frame}
+
+\subsection{Ordonnancement}
+\begin{frame}[fragile]
+\frametitle{Ordonnancement}
+\framesubtitle{Problème}
+\begin{lstlisting}
+struct foo {
+  int a;
+  int b;
+};
+struct foo *gp = NULL;
+/* . . . */
+p = kmalloc(sizeof(*p), GFP_KERNEL);
+p->a = 1;
+p->b = 2;
+gp = p;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Ordonnancement}
+\framesubtitle{Solution}
+\begin{lstlisting}
+struct foo {
+  int a;
+  int b;
+};
+struct foo *gp = NULL;
+/* . . . */
+p = kmalloc(sizeof(*p), GFP_KERNEL);
+WriteMemoryBarrier();
+p->a = 1;
+p->b = 2;
+gp = p;
+WriteMemoryBarrier();
+\end{lstlisting}
 \end{frame}
 
 \section{Conclusion}

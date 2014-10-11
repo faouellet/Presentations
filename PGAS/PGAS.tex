@@ -172,8 +172,9 @@
 Vector<int> Add(Vector<int> A, 
                 Vector<int> B) {
   Vector<int> C;
-  @\textcolor{green}{parfor}@(int i = 0; i < 100000000; ++i)
+  @\textcolor{green}{parfor}@(int i = 0; i < 100000000; ++i) {
     C[i] = A[i] + B[i];  
+  }
   
   return C;
 }
@@ -238,7 +239,7 @@ void Func() {
   int Res = CalculComplexe(@\textcolor{green}{this\_locale}@.ID);
   print("Resultat:", Res);
 }
-
+/*...*/
 for(int j = 0; j < nbLocales(); ++j) {
   do @\textcolor{green}{on}@ Locale[j] {
     Func();
@@ -268,6 +269,7 @@ void Func() {
   println("Locale:", @\textcolor{green}{this\_locale}@.ID);
   println("Resultat:", Res);
 }
+/*...*/
 do @\textcolor{green}{on}@ Locale[3] {
     @\textcolor{green}{async}@ Func();
 }

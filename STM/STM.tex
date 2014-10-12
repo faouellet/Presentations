@@ -7,6 +7,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[overlay,absolute]{textpos}
 \usepackage{adjustbox}
+\usepackage[]{algorithm2e}
 
 \AtBeginSection[]
 {
@@ -95,12 +96,39 @@ public:
 \end{adjustbox}
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Programmation parallèle traditionnelle}
+\framesubtitle{Exemple}
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  From.withdraw(Amount);
+  To.deposit(Amount);
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Programmation parallèle traditionnelle}
+\framesubtitle{Exemple}
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  From.lock();
+  To.lock();
+  From.withdraw(Amount);
+  To.deposit(Amount);
+  From.unlock();
+  To.unlock();
+}
+\end{lstlisting}
+\end{frame}
+
 \subsection{Problèmes}
 \begin{frame}
 \frametitle{Problèmes}
 \begin{itemize}
 \item Problèmes de synchronisation
-\item<2-> Coût des verrous
 \item<3-> Difficile à composer
 \item<4-> Penser parallèle
 \end{itemize}
@@ -111,94 +139,90 @@ public:
 \begin{frame}
 \frametitle{Concept}
 \begin{itemize}
-\item Semblable aux transactions dans une base de données
+\item Suite d'instructions exécutées d'une manière semblable aux transactions dans une base de données
+\begin{itemize}
+\item<2-> Atomique: Aucun état intermédiaire visible
+\item<3-> Isolée: Non affectée par les autres \textit{threads}
 \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Concept}
+\framesubtitle{Exemple}
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  atomic {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\subsection{Possible implémentation}
+\begin{frame}
+\frametitle{Possible implémentation}
+\begin{algorithm}[H]
+ Associer un \textit{log} à chaque variable impliquée dans une transaction (globalement)\;
+ \While{Transaction non valide}{
+  Exécuter instructions sur une copie courante des variables\;
+  Valider transaction (atomiquement)\;
+  \If{Transaction valide}{
+  Écrire transaction (atomiquement)\;
+   }
+ }
+\end{algorithm}
 \end{frame}
 
 \subsection{Avantages}
 \begin{frame}
 \frametitle{Avantages}
-
+\begin{itemize}
+\item Composable
+\item<2-> Élimine les possibilités de \textit{deadlock}
+\item<3-> Facilite le raisonnement
+\end{itemize}
 \end{frame}
 
 \subsection{Problèmes potentiels}
 \begin{frame}
 \frametitle{Problèmes potentiels}
 \begin{itemize}
-\item Problèmes de performance
+\item Problèmes d'implémentation et de performance
 \item<2-> Interactions avec code non-transactionnel
 \item<3-> Gestions des exceptions
 \end{itemize}
 \end{frame}
 
-\subsection{Possible implémentation}
-\begin{frame}
-\frametitle{Possible implémentation}
-
-\end{frame}
-
 \section{Support présent}
 \subsection{Langages de programmation}
 \begin{frame}[fragile]
-\frametitle{Haskell}
-\begin{itemize}
-\item Existe déjà dans Concurrent Haskell
-\end{itemize}
-\lstset{language=Haskell,
-        basicstyle=\ttfamily,
-        keywordstyle=\color{green}\ttfamily,
-        stringstyle=\color{red}\ttfamily,
-        commentstyle=\color{cyan}\ttfamily,
-        morecomment=[l][\color{magenta}]{\#}
+\frametitle{C++}
+Extension disponible dans GCC depuis GCC 4.7
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  __transaction_atomic {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
 }
-\begin{lstlisting}
-   credit :: Integer -> Account -> STM ()
-   credit amount account = do
-       current <- readTVar account
-       writeTVar account (current + amount)
- 
-   debit :: Integer -> Account -> STM ()
-   debit amount account = do
-       current <- readTVar account
-       writeTVar account (current - amount)
 \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
 \frametitle{C++}
-\begin{itemize}
-\item Extension disponible dans GCC depuis GCC 4.7
-\end{itemize}
+En voie d'être standardisé pour C++17
 \begin{lstlisting}
-    void func()
-    {
-      for (int i = 0; i < 100; ++i) {
-        __transaction_atomic {
-          ++a;
-          b += 2;
-          c = a + b;
-        }
-      }
-    }
-\end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{C++}
-\begin{itemize}
-\item En voie d'être standardisé pour C++17
-\end{itemize}
-\begin{lstlisting}
-    void func()
-    {
-      for (int i = 0; i < 100; ++i) {
-        atomic_noexcept {
-          ++a;
-          b += 2;
-          c = a + b;
-        }
-      }
-    }
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  atomic_noexcept {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
+}
 \end{lstlisting}
 \end{frame}
 

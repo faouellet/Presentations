@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
+\usepackage{lmodern}
 
 \title{Résumés de présentations}
 \date{}
@@ -88,7 +89,7 @@ Selon les estimations présentes de compagnies comme Cray et Intel, d'ici 2020, 
 \newpage
 
 \section*{Techniques de programmation sans verrous}
-Les verrous (mutex, sémaphores, etc...) sont des moyens de prévenir des conditions de course dans un programme parallèle. Les verrous sont un des moyens les plus populaires pour raisonner sur un programme parallèle. Les verrous sont aussi une des choses qui retiennent l'avancement de la programmation parallèle. Dans cette présentation, j'aborderai diverses techniques de programmation sans verrous tout en exposant les implications profondes d'avoir un modèle mémoire dans un langage de programmation.
+Les verrous (mutex, sémaphores, etc...) sont les moyens les plus souvent utilisés pour raisonner sur un programme parallèle. Ils ne sont par contre pas toujours les moyens les plus efficaces pour implémenter des algorithmes et des structures de données parallèles. Dans cette présentation, je ferais un bref survol de techniques permettant de se libérer des verrous dans un contexte multiprogrammé ainsi que des dangers qui guettent ceux qui voudrait se risquer à les utiliser.
 
 \renewcommand\refname{Références LockFree}
 \begin{thebibliography}{9}
@@ -108,6 +109,7 @@ Les verrous (mutex, sémaphores, etc...) sont des moyens de prévenir des condit
           Boostcon, 2013.
           
 \bibitem{4}
+          Bruce Dawson
           \emph{Lockless Programming Considerations for Xbox 360 and Microsoft Windows}.
           Microsoft, 2013.
 \end{thebibliography}
@@ -115,7 +117,7 @@ Les verrous (mutex, sémaphores, etc...) sont des moyens de prévenir des condit
 \newpage
 
 \section*{Mémoire transactionnelle logicielle}
-Dans le monde de la programmation parallèle, les verrous sont souvent un mal nécessaire. En effet, comment peut-on s'assurer de l'atomicité de certaines opérations sans eux? Jusqu'à tout récemment, aucune réponse satisfaisante n'avait été formulée. Ceci à par contre changé dans les dernières années avec tout l'effort mis dans la mémoire transactionnelle logicielle. Cette présentation expliquera le pourquoi et le comment de cette technique de programmation parallèle. De plus, on y discutera aussi de l'aspect plus pratique de la chose en abordant des thèmes comme l'intégration de la mémoire transactionnelle dans des langages de programmation et les toutes dernières générations de processeurs.
+Dans le monde de la programmation parallèle, les verrous sont souvent un mal nécessaire. En effet, comment peut-on s'assurer de l'atomicité de certaines opérations sans eux? Jusqu'à tout récemment, aucune réponse satisfaisante n'avait été formulée. Ceci risque par contre de changer dans les prochaines années avec tout l'effort mis dans la mémoire transactionnelle logicielle. Cette présentation expliquera le pourquoi et le comment de cette technique de programmation parallèle. De plus, on y discutera aussi de l'aspect plus pratique de la chose en abordant des thèmes comme l'intégration de la mémoire transactionnelle dans des langages de programmation et les toutes dernières générations de processeurs.
 
 \renewcommand\refname{Références STM}
 \begin{thebibliography}{9}
@@ -138,20 +140,80 @@ Dans le monde de la programmation parallèle, les verrous sont souvent un mal n�
           Victor Luchangco et al.,
           \emph{Standard Wording for Transactional Memory Support in C++}.
           C++ Standards Committee Papers, 2014.
+          
+\bibitem{5}
+          Simon Peyton Jones,
+          \emph{Beautiful Concurrency}.
+          Beautiful Code, O,Reilly, 2007.
          
 \end{thebibliography}
 
 \newpage
 
-\section*{Processeur neuronal}
-
-
+\section*{Calcul approximatif et processeurs neuronaux}
+Au cours des dernières années, le monde de l'informatique a progressivement amorcer un virage vers la programmation parallèle. Les gains les plus souvent cités de ce virage sont ceux relevant de la performance des applications multiprogrammées. Cependant, il ne faudrait pas oublier que des gains ont aussi été faits au niveau de la consommation d'énergie. Dans cette présentation, j'introduirai un nouveau paradigme de programmation, le calcul approximatif, qui pousse encore plus loin cette idée d'économie d'énergie. De plus, je discuterai aussi d'un nouvel accélérateur basé sur les réseau de neurones développé pour supporter ce paradigme.
 \renewcommand\refname{Références NPU}
 \begin{thebibliography}{9}
 \bibitem{1}
-          Simon Peyton-Jones \& Tim Harris,
+          Hadi Esmaeilzadeh et al.,
+          \emph{Neural Acceleration for General-Purpose Approximate Programs}.
+          Proceedings of the 2012 45th Annual IEEE/ACM International Symposium on Microarchitecture, 2012.
+          
+\bibitem{2}
+          Hadi Esmaeilzadeh et al.,
+          \emph{Neural Acceleration for General-Purpose Approximate Programs}.
+          Proceedings of the 2012 45th Annual IEEE/ACM International Symposium on Microarchitecture, 2012.
+          
+\bibitem{3}
+          Jie Han \& Michael Orshansky,
+          \emph{Approximate computing: An emerging paradigm for energy-efficient design}.
+          Proceedings of the 18th IEEE European Test Symposium, 2013.
+         
+\end{thebibliography}
+
+\newpage
+
+\section*{Détection de conditions de course}
+Il va sans dire, corriger un programme parallèle est une des tâches les plus ardues auxquelles un programmeur peut être confronté. Dans l'espoir d'aider les programmeurs à régler des problèmes de multiprogrammation, plusieurs outils de détection de conditions de course ont été développé. Cette présentation se voudra une introduction à la théorie et aux algorithmes traînant derrière de tels outils.
+\renewcommand\refname{Références TSan}
+\begin{thebibliography}{9}
+\bibitem{1}
+          Stefan Savage et al.,
+          \emph{Eraser: A Dynamic Data Race Detector for Multithreaded Programs}.
+          ACM Trans. Comput. Syst., Nov. 1997
+          
+\bibitem{2}
+          John Erickson et al.,
+          \emph{Effective Data-race Detection for the Kernel}.
+          Proceedings of the 9th USENIX Conference on Operating Systems Design and Implementation, 2010
+          
+\bibitem{3}
+          Konstantin Serebryany \& Timur Iskhodzhanov,
+          \emph{ThreadSanitizer: Data Race Detection in Practice}.
+          Proceedings of the Workshop on Binary Instrumentation and Applications, 2009
+          
+\bibitem{4}
+          Utpal Banerjee et al.,
+          \emph{A Theory of Data Race Detection}.
+          Proceedings of the 2006 Workshop on Parallel and Distributed Systems: Testing and Debugging, 2006
+         
+\end{thebibliography}
+
+\newpage
+
+\section*{Algorithmes insensibles à la cache}
+Un bon algorithme devrait être conscient du fait qu'il sera exécuté sur une machine possédant une hiérarchie mémoire comportant souvent plusieurs paliers. Il ne devrait cependant pas être trop attaché à la hiérarchie mémoire d'un processeur donné pour ne pas perdre de sa portabilité. Dans cette présentation, j'explorerai cette idée d'algorithmes conscients sans trop être attachés à la cache dans le contexte de systèmes concurrents et parallèles.
+\renewcommand\refname{Références cache}
+\begin{thebibliography}{9}
+\bibitem{1}
+          Erik Demaine,
           \emph{Programming in the Age of Concurrency: Software Transactional Memory}.
-          Channel 9, 2006.
+          Lecture notes from the EEF summer school on massive data sets, 2002.
+          
+\bibitem{2}
+          Harald Prokop,
+          \emph{Cache-Oblivious Algorithms}.
+          Master's thesis, 1999.
          
 \end{thebibliography}
 

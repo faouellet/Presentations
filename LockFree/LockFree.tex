@@ -84,12 +84,16 @@ int ThreadSafeIntStack::pop() {
 \end{lstlisting}
 \end{frame}
 
-\subsection{Problèmes}
+\subsection{Problème}
 \begin{frame}
-\frametitle{Problèmes}
+\frametitle{Problème}
+\framesubtitle{Coût des verrous}
+Traditionnellement:
 \begin{itemize}
-\item Coût des verrous
-\item Inversion de priorités
+\item[1.] Attendre que le mutex soit disponible
+\item[2.] Acquérir le mutex
+\item[3.] Effectuer opération(s)
+\item[4.] Libérer le mutex
 \end{itemize}
 \end{frame}
 
@@ -161,11 +165,46 @@ Exemple:
 }
 \end{frame}
 
-\section{Techniques}
-\subsection{Read-Modify-Write}
+\section{Opérations atomiques}
+\subsection{Atomiques?}
+\begin{frame}[fragile]
+\frametitle{Atomiques?}
+\framesubtitle{Test 1}
+\begin{lstlisting}
+uint64_t sharedValue = 0;
+
+/* . . . */
+
+sharedValue = 0x100000002;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Atomiques?}
+\framesubtitle{Test 1}
+Compilé pour x86:
+\begin{lstlisting}
+
+/* . . . */
+
+mov	DWORD PTR sharedValue, 2
+mov	DWORD PTR sharedValue+4, 1
+
+/* . . . */
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Atomiques?}
+\framesubtitle{Test 2}
+\begin{lstlisting}
+strd r0, r1, [r2]
+\end{lstlisting}
+\end{frame}
+
+\subsection{Opération atomiques usuelles}
 \begin{frame}
 \frametitle{Read-Modify-Write}
-\framesubtitle{Haut niveau}
 \begin{itemize}
 \item Classe d'opérations atomiques
 \item Souvent utilisé pour implémenter des mutex
@@ -173,17 +212,6 @@ Exemple:
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Read-Modify-Write}
-\framesubtitle{Opérations}
-\begin{itemize}
-\item Test-And-Set
-\item Fetch-And-Add
-\item Compare-And-Swap
-\end{itemize}
-\end{frame}
-
-\subsection{Compare-And-Swap}
 \begin{frame}[fragile]
 \frametitle{Compare-And-Swap}
 \framesubtitle{Haut niveau}
@@ -222,6 +250,7 @@ void LockFreeList::PushFront(Node *newHead) {
 \end{lstlisting}
 \end{frame}
 
+\section{Problèmes potentiels}
 \subsection{Problème ABA}
 \begin{frame}
 \frametitle{Problème ABA}
@@ -380,10 +409,43 @@ void LockFreeList::PushFront(Node *newHead) {
 \end{tikzpicture}
 \end{frame}
 
-\section{Modèle mémoire}
-\subsection{Modèle mémoire}
+\begin{frame}
+\frametitle{Problème ABA}
+\framesubtitle{Solutions potentielles}
+\begin{itemize}
+\item Tags
+\item Réclamation différée
+\item Acteurs
+\end{itemize}
+\end{frame}
+
+\subsection{Ordonnancement mémoire}
+\begin{frame}
+\frametitle{Réordonnancement mémoire}
+Au départ: X = 0, Y = 0
+
+\onslide<2-3>{
+\begin{center}
+\begin{tabular}{  c | c  }
+  \hline
+  Thread 1 & Thread 2 \\
+  \hline
+  X = 1 & Y = 1  \\
+
+  x = Y & y = X \\
+  \hline
+\end{tabular}
+\end{center}
+}
+\onslide<3>{
+À la fin: \{x = 1, y = 0\}, \{x = 0, y = 1\}, \{x = 1, y = 1\}, \\
+\{x = 0, y = 0\}
+}
+\end{frame}
+
 \begin{frame}
 \frametitle{Modèle mémoire}
+\framesubtitle{Général}
 \begin{itemize}
 \item Existe au niveau du langage et du processeur
 \item Décrit l'interaction possible entre fils d'exécution
@@ -395,73 +457,38 @@ void LockFreeList::PushFront(Node *newHead) {
 \end{itemize}
 \end{frame}
 
-\subsection{Visibilité}
-\begin{frame}[fragile]
-\frametitle{Visibilité}
-\framesubtitle{Problème}
-\begin{lstlisting}
-// Processeur #1
-while (f) {
-  print x;
-}
-
-// Processeur #2
-x = 42;
-f = false;
-\end{lstlisting}
+\begin{frame}
+\frametitle{Modèle mémoire}
+\framesubtitle{Langages}
+\begin{itemize}
+\item Cohérence séquentielle sur les variables atomiques
+\begin{itemize}
+\item On impose un ordre global sur les accès mémoire pour préserver l'ordre du programme
+\item Utilisation de barrières mémoire en dessous des couvertures
+\item Exemple: \textit{volatile} en Java, std::atomic\textless T\textgreater
+\end{itemize}
+\end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Visibilité}
-\framesubtitle{Solution}
-\begin{lstlisting}
-// Processeur #1
-while (f);
-WriteMemoryBarrier();
-print x;
+\begin{frame}
+\frametitle{Modèle mémoire}
+\framesubtitle{Application}
+Au départ: X = 0, Y = 0 (variables atomiques)
 
-// Processeur #2
-x = 42;
-WriteMemoryBarrier();
-f = false;
-\end{lstlisting}
-\end{frame}
+\begin{center}
+\begin{tabular}{  c | c  }
+  \hline
+  Thread 1 & Thread 2 \\
+  \hline
+  X = 1 & Y = 1  \\
 
-\subsection{Ordonnancement}
-\begin{frame}[fragile]
-\frametitle{Ordonnancement}
-\framesubtitle{Problème}
-\begin{lstlisting}
-struct foo {
-  int a;
-  int b;
-};
-struct foo *gp = NULL;
-/* . . . */
-p = kmalloc(sizeof(*p), GFP_KERNEL);
-p->a = 1;
-p->b = 2;
-gp = p;
-\end{lstlisting}
-\end{frame}
+  x = Y & y = X \\
+  \hline
+\end{tabular}
+\end{center}
 
-\begin{frame}[fragile]
-\frametitle{Ordonnancement}
-\framesubtitle{Solution}
-\begin{lstlisting}
-struct foo {
-  int a;
-  int b;
-};
-struct foo *gp = NULL;
-/* . . . */
-p = kmalloc(sizeof(*p), GFP_KERNEL);
-WriteMemoryBarrier();
-p->a = 1;
-p->b = 2;
-gp = p;
-WriteMemoryBarrier();
-\end{lstlisting}
+À la fin: \{x = 1, y = 0\}, \{x = 0, y = 1\}, \{x = 1, y = 1\}
+
 \end{frame}
 
 \section{Conclusion}
@@ -469,7 +496,7 @@ WriteMemoryBarrier();
 \frametitle{Conclusion}
 \begin{itemize}
 \item On jongle avec des lames de rasoir
-\item<2-> Il faut connaître ses outils logiciels et matériels
+\item<2-> Pas nécessairement généralisable
 \end{itemize}
 \end{frame}
 

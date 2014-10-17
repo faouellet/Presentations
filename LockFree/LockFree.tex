@@ -166,6 +166,12 @@ Exemple:
 \end{frame}
 
 \section{Opérations atomiques}
+\subsection{Définition}
+\begin{frame}[fragile]
+\frametitle{Définition}
+Opération qui s'exécute entièrement sans pouvoir être interrompue
+\end{frame}
+
 \subsection{Atomiques?}
 \begin{frame}[fragile]
 \frametitle{Atomiques?}
@@ -197,9 +203,17 @@ mov	DWORD PTR sharedValue+4, 1
 \begin{frame}[fragile]
 \frametitle{Atomiques?}
 \framesubtitle{Test 2}
+Instruction ARMv7
+
 \begin{lstlisting}
 strd r0, r1, [r2]
 \end{lstlisting}
+
+\only<2>{
+\begin{textblock}{5.5}(8, 7)
+	 {Le processeur va exécuter deux instructions \textit{store} sur 32 bits}
+\end{textblock}
+}
 \end{frame}
 
 \subsection{Opération atomiques usuelles}
@@ -216,12 +230,14 @@ strd r0, r1, [r2]
 \frametitle{Compare-And-Swap}
 \framesubtitle{Haut niveau}
 \begin{lstlisting}
-int CompareAndSwap(int *reg, int oldVal,
-                   int newVal) {
-  int r = *reg;
-  if (*reg == oldVal)
-      *reg = newVal;
-  return r;
+int CompareAndSwap(int *reg, int swap,
+                   int compare) {
+  atomic {                   
+    int val = *reg;
+    if (compare == val)
+        *reg = swap;
+    return val;
+  }
 }
 \end{lstlisting}
 \end{frame}
@@ -413,7 +429,7 @@ void LockFreeList::PushFront(Node *newHead) {
 \frametitle{Problème ABA}
 \framesubtitle{Solutions potentielles}
 \begin{itemize}
-\item Tags
+\item Numéro de version
 \item Réclamation différée
 \item Acteurs
 \end{itemize}

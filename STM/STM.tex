@@ -8,6 +8,8 @@
 \usepackage[overlay,absolute]{textpos}
 \usepackage{adjustbox}
 \usepackage[]{algorithm2e}
+\usepackage{colortbl}
+\usepackage{amsfonts}
 
 \AtBeginSection[]
 {
@@ -25,8 +27,11 @@
         keywordstyle=\color{green}\ttfamily,
         stringstyle=\color{red}\ttfamily,
         commentstyle=\color{cyan}\ttfamily,
-        morecomment=[l][\color{magenta}]{\#}
+        morecomment=[l][\color{magenta}]{\#},
+        escapechar=@
 }
+
+\definecolor{DGreen}{rgb}{0,.8,0}
 
 \setbeamercolor{normal text}{fg=white,bg=black!90}
 \setbeamercolor{structure}{fg=white}
@@ -77,6 +82,9 @@
 \begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
 \begin{lstlisting}
 class Account {
+private:
+  int m_Balance;
+  
 public:
   void deposit(int n) {
     m_Mutex.lock();
@@ -165,8 +173,8 @@ void transfer(Account & From, Account & To,
 \begin{frame}
 \frametitle{Possible implémentation}
 \begin{algorithm}[H]
- Associer un \textit{log} à chaque variable impliquée dans une transaction (globalement)\;
- \While{Transaction non valide}{
+ Créer un \textit{log} local au \textit{thread} exécutant la section atomique\;
+ \Repeat{Transaction valide}{
   Exécuter instructions sur une copie courante des variables\;
   Valider transaction (atomiquement)\;
   \If{Transaction valide}{
@@ -176,24 +184,248 @@ void transfer(Account & From, Account & To,
 \end{algorithm}
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Possible implémentation}
+\framesubtitle{Exemple}
+\begin{columns}
+    \begin{column}{0.48\textwidth}
+        \begin{lstlisting}
+From::m_Balance = 10;
+To::m_Balance = 10;       
+        
+atomic {
+  From.withdraw(10);
+  To.deposit(10);
+}
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+        \begin{tabular}{ | c | c | c | }
+  \hline
+  Addresse & Valeur & Type \\
+  \hline
+  \onslide<2->{\&From::m\_Balance & 10 & L} \\
+  \hline
+  \onslide<3->{\&From::m\_Balance & 0 & É} \\
+  \hline
+  \onslide<4->{\&To::m\_Balance & 10 & L} \\
+  \hline
+  \onslide<5->{\&To::m\_Balance & 20 & É} \\
+  \hline
+\end{tabular}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Possible implémentation}
+\framesubtitle{Exemple}
+\begin{columns}
+    \begin{column}{0.48\textwidth}
+        \begin{lstlisting}
+From::m_Balance = @\textcolor{green}{10}@;
+To::m_Balance = @\textcolor{green}{10}@;       
+        
+atomic {
+  From.withdraw(10);
+  To.deposit(10);
+}
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+        \begin{tabular}{ | c | c | c | }
+  \hline
+  Addresse & Valeur & Type \\
+  \hline
+  \rowcolor{DGreen}\&From::m\_Balance & 10 & L \\
+  \hline
+  \&From::m\_Balance & 0 & É \\
+  \hline
+  \rowcolor{DGreen}\&To::m\_Balance & 10 & L \\
+  \hline
+  \&To::m\_Balance & 20 & É \\
+  \hline
+\end{tabular}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Possible implémentation}
+\framesubtitle{Exemple}
+\begin{columns}
+    \begin{column}{0.48\textwidth}
+        \begin{lstlisting}
+From::m_Balance = @\textcolor{green}{10}@;
+To::m_Balance = @\textcolor{red}{20}@;       
+        
+atomic {
+  From.withdraw(10);
+  To.deposit(10);
+}
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+        \begin{tabular}{ | c | c | c | }
+  \hline
+  Addresse & Valeur & Type \\
+  \hline
+  \rowcolor{DGreen}\&From::m\_Balance & 10 & L \\
+  \hline
+  \&From::m\_Balance & 0 & É \\
+  \hline
+  \rowcolor{red}\&To::m\_Balance & 10 & L \\
+  \hline
+  \&To::m\_Balance & 20 & É \\
+  \hline
+\end{tabular}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\section{Évaluation}
 \subsection{Avantages}
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Avantages}
-\begin{itemize}
-\item Composable
-\item Élimine les possibilités de \textit{deadlock}
-\item Facilite le raisonnement
-\end{itemize}
+\begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  atomic {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
+}
+\end{lstlisting}
+\end{adjustbox}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Avantages}
+\begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
+\begin{lstlisting}
+void transfer(Account & From, Account & To, 
+              int Amount) {
+  atomic {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
+}
+/*...*/
+atomic {
+  transfer(Account1, Account2, 500);
+  transfer(Account2, Account3, 300);
+}
+\end{lstlisting}
+\end{adjustbox}
+
+\begin{textblock}{5}(10, 8)
+	 \begin{itemize}
+	 \item Composable
+	 \item<2-> Évite les \textit{deadlocks}
+	 \end{itemize}
+\end{textblock}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Avantages}
+\framesubtitle{Facilite le raisonnement}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+    Niveau professionnel
+    \begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
+        \begin{lstlisting}  
+void transfer(Account & From, 
+              Account & To, 
+              int Amount) {
+  From.lock();
+  To.lock();
+  From.withdraw(Amount);
+  To.deposit(Amount);
+  From.unlock();
+  To.unlock();
+}
+        \end{lstlisting}
+        \end{adjustbox}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    Niveau étudiant
+    \begin{adjustbox}{width=\textwidth,height=\someheight,keepaspectratio}
+        \begin{lstlisting}        
+void transfer(Account & From, 
+              Account & To, 
+              int Amount) {
+  atomic {
+    From.withdraw(Amount);
+    To.deposit(Amount);
+  }
+}
+        \end{lstlisting}
+        \end{adjustbox}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \subsection{Problèmes potentiels}
 \begin{frame}
 \frametitle{Problèmes potentiels}
+\framesubtitle{Problèmes d'implémentation et de performance}
 \begin{itemize}
-\item Problèmes d'implémentation et de performance
-\item Interactions avec code non-transactionnel
-\item Gestions des exceptions
+\item Solution avec verrous: Comment être performant?
+\item Solution avec verrous: Voir présentation précédente
+\item Solution hybride: Requiert beaucoup de finesse
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Problèmes potentiels}
+\framesubtitle{Interactions avec code non-transactionnel}
+\begin{center}
+// Initialement: x\_b = true; x\_i = 0;
+\end{center}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+    Thread 1
+        \begin{lstlisting}        
+atomic {
+  x_b = false;
+}
+x_i = 100;
+        \end{lstlisting}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    Thread 2
+        \begin{lstlisting}        
+atomic {
+  if (x_b) {
+    ++x_i;
+  }
+}
+        \end{lstlisting}
+    \end{column}
+\end{columns}
+\begin{center}
+Que vaut x à la fin du programme?
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Problèmes potentiels}
+\framesubtitle{Gestions des exceptions}
+\begin{lstlisting}
+void fonction() {
+  /*...*/
+  atomic {
+    i++;
+    throw 42;
+  }
+  /*...*/
+}
+\end{lstlisting}
+
+\begin{textblock}{5}(9, 8)
+	 \huge{Que faire?}
+\end{textblock}
 \end{frame}
 
 \section{Support présent}

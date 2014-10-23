@@ -6,6 +6,8 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[overlay,absolute]{textpos}
+\usepackage[]{algorithm2e}
+\usepackage{amssymb}
 \usepackage{tikz}
 \usetikzlibrary{arrows, automata}
 
@@ -125,18 +127,22 @@ Un programme parallèle sans condition de course ne comporte que des accès ordo
 \begin{frame}
 \frametitle{Opérations de synchronisation}
 \framesubtitle{Pratique}
-\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=2cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
-  \node[main node] (1) [label={above:Réception}] {};
+  \node (5) [] {};
+  \node[main node] (1) [right of=5, label={above:Réception}] {};
   \node[main node] (2) [right of=1, label={above:Publication}] {};
   \node[main node] (3) [right of=2, label={above:Réception}] {};
   \node[main node] (4) [right of=3, label={above:Publication}] {};
+  \node (6) [right of=4] {};
 
   \path[every node/.style={font=\sffamily\small}]
     (1) edge node [right] {} (2)
     (2) edge node [right] {} (3)
-    (3) edge node [right] {} (4);
+    (3) edge node [right] {} (4)
+    (5) edge node [right] {} (1)
+    (4) edge node [right] {} (6);
 \end{tikzpicture}
 \end{frame}
 
@@ -188,7 +194,7 @@ Suite d'opérations effectuées par un \textit{thread} se terminant par une opé
   \node[main node] (1) [] {};
   \node[main node] (2) [right of=1] {};
   \node[main node] (3) [right of=2] {};
-  \node[main node] (4) [below of=1] {};
+  \node[main node] (4) [right of=1] {};
   \node[main node] (5) [right of=5, below of=1] {};
   \node[main node] (6) [right of=6, below of=2] {};
 
@@ -218,15 +224,127 @@ Suite d'opérations effectuées par un \textit{thread} se terminant par une opé
 \end{frame}
 
 \begin{frame}
-\frametitle{Concepts de base}
-\framesubtitle{Condition de course}
+\frametitle{Horloge vectorielle}
+\framesubtitle{Théorie}
+Structure permettant d'effectuer un ordonnancement partiel des événements dans un système parallèle
+\end{frame}
 
+\begin{frame}[shrink=20]
+\frametitle{Horloge vectorielle}
+\framesubtitle{Pratique}
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node[main node, label=above:{$(1,0,0)$}] (1)  [] {A1};
+  \node[main node, label=above:{$(2,0,0)$}] (2)  [right of=1] {A2};
+  \node[main node, label=above:{$(3,3,0)$}] (3)  [right of=2] {A3};
+  \node[main node, label=above:{$(4,3,3)$}] (4)  [right of=3] {A4};
+  
+  \node[main node, label=below:{$(0,1,0)$}] (5)  [below of=1] {B1};
+  \node[main node, label=below left:{$(1,2,0)$}] (6)  [right of=5] {B2};
+  \node[main node, label=below:{$(1,3,0)$}] (7)  [right of=6] {B3};
+  \node[main node, label=below:{$(1,4,0)$}] (8)  [right of=7] {B4};
+  
+  \node[main node, label=below:{$(0,0,1)$}] (9)  [below of=5] {C1};
+  \node[main node, label=below:{$(1,2,2)$}] (10) [right of=9] {C2};
+  \node[main node, label=below:{$(1,2,3)$}] (11) [right of=10] {C3};
+  \node[main node, label=below:{$(1,2,4)$}] (12) [right of=11] {C4};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (2)
+    (2) edge node [right] {} (3)
+    (3) edge node [right] {} (4)
+    (5) edge node [right] {} (6)
+    (6) edge node [right] {} (7)
+    (7) edge node [right] {} (8)
+    (9) edge node [right] {} (10)
+    (10) edge node [right] {} (11)
+    (11) edge node [right] {} (12);
+  
+  \path (1) edge [->] (6);
+  \path (6) edge [->] (10);
+  \path (11) edge [->] (4);
+  \path (7) edge [->] (3);
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Conditions de course}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+Deux accès mémoire dont au moins un est une écriture et qui pourraient être exécutées simultanément sans connaissance des manipulations effectuées par l'autre \textit{thread} 
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=2.5cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node (1) [label={above:$T$}] {};
+  \node[main node] (2) [below of=1, label={above left:x=1}, label={below left:(2, 2)}] {};
+  \node (3) [below of=2] {};
+  
+  \node (4) [right of=1, label={above:$T^{\prime}$}] {};
+  \node[main node] (5) [below of=4, label={above right:if(x==1)}, label={below right:(2, 2)}] {};
+  \node (6) [below of=5] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (2)
+    (2) edge node [right] {} (3)
+    (4) edge node [right] {} (5)
+    (5) edge node [right] {} (6);
+\end{tikzpicture}
+\end{center}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \subsection{Algorithme}
 \begin{frame}
 \frametitle{Algorithme}
+\framesubtitle{Équations}
+Il y a une condition de course entre un segment $S$ et un segment $S^{\prime}$ si:
+\begin{itemize}
+\item[1.]  $V_{S}(T) \geq V_{S^{\prime}}(T)$ et $V_{S^{\prime}}(T^{\prime}) \geq V_{S}(T^{\prime})$
+\item[2.]  $[R_{S} \cup W_{S}] \cap W_{S^{\prime}} \neq \emptyset$ ou $[R_{S^{\prime}} \cup W_{S^{\prime}}] \cap W_{S} \neq \emptyset$
+\end{itemize}
+\end{frame}
 
+\begin{frame}
+\frametitle{Algorithme}
+\framesubtitle{Pratique}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+\begin{itemize}
+\item[\checkmark] $V_{S}(T) \geq V_{S^{\prime}}(T)$
+\item[\checkmark]<2-> $V_{S^{\prime}}(T^{\prime}) \geq V_{S}(T^{\prime})$
+\item[\checkmark]<3-> $[R_{S^{\prime}} \cup W_{S^{\prime}}] \cap W_{S} \neq \emptyset$
+\end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=2.5cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+  \node (1) [] {};
+  \node[main node] (2) [below of=1, label={above left:x=1}, label={below left:(2, 2)}] {};
+  \node (3) [below of=2] {};
+  
+  \node (4) [right of=1] {};
+  \node[main node] (5) [below of=4, label={above right:if(x==1)}, label={below right:(2, 2)}] {};
+  \node (6) [below of=5] {};
+
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node [right] {} (2)
+    (2) edge node [right] {} (3)
+    (4) edge node [right] {} (5)
+    (5) edge node [right] {} (6);
+\end{tikzpicture}
+\end{center}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \section{Ensemble de verrous}
@@ -241,6 +359,99 @@ Un programme parallèle sans condition de course respecte toujours une saine dis
 \frametitle{Algorithme}
 \framesubtitle{Ébauche}
 But: S'assurer que toute structure partagée soit protégée par un verrou
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithme}
+\framesubtitle{Ébauche}
+\begin{algorithm}[H]
+ Verrous(\textit{T}) = Ensemble de verrous acquis par un \textit{thread T}\;
+ C(\textit{v}) = verrous possibles pour une variable \textit{v}\;
+ 
+ \For{Toute variable partagé \textit{v}}{
+ C(\textit{v}) = tous les verrous présents dans l'application
+ }
+ 
+ \For{Tout accès à une variable partagé \textit{v}}{
+ C(\textit{v}) = C(\textit{v}) $\cap$ Verrous(\textit{T})\;
+ \If{C(\textit{v}) == \{\}}{
+   Condition de course détectée 
+ }
+ }
+\end{algorithm}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Algorithme}
+\framesubtitle{Ébauche}
+\begin{columns}
+    \begin{column}{0.48\textwidth}
+        \begin{lstlisting}
+Mutex1.lock();
+v = v + 1;
+Mutex1.unlock();
+Mutex2.lock();
+v = v + 1;
+Mutex2.unlock();
+\end{lstlisting}
+\only<1>{
+\begin{textblock}{5}(5.75, 6.47)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<2>{
+\begin{textblock}{5}(5.75, 7.33)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<3>{
+\begin{textblock}{5}(5.75, 8)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<4>{
+\begin{textblock}{5}(5.75, 8.91)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<5>{
+\begin{textblock}{5}(5.75, 9.7)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<6>{
+\begin{textblock}{5}(5.75, 10.35)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+\only<7>{
+\begin{textblock}{5}(5.75, 11.3)
+	 \scalebox{1.5}{$\Lleftarrow$}
+\end{textblock}
+}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+        \begin{tabular}{ | c | c | }
+  \hline
+  Verrous & C(\textit{v}) \\
+  \hline
+  \{\} & \{Mutex1, Mutex2\} \\
+  \hline
+  \onslide<2->{\{Mutex1\} & \{Mutex1, Mutex2\}} \\
+  \hline
+  \onslide<3->{\{Mutex1\} & \{Mutex1\}} \\
+  \hline
+  \onslide<4->{\{\} & \{Mutex1\}} \\
+  \hline
+  \onslide<5->{\{Mutex2\} & \{Mutex1\}} \\
+  \hline
+  \onslide<6->{\{Mutex2\} & \{Mutex1\}} \\
+  \hline
+  \onslide<7->{\{\} & \{\}} \\
+  \hline
+\end{tabular}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}
@@ -278,19 +489,51 @@ Trois problèmes de l'algorithme précédent
 \end{center}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[shrink=25]
 \frametitle{Algorithme}
 \framesubtitle{Raffinement}
-\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
-                    semithick]
-  \tikzstyle{every state}=[text=white]
+\begin{algorithm}[H]
+ Verrous(\textit{T}) = Ensemble de verrous acquis par un \textit{thread T}\;
+ Verrous\_É(\textit{T}) = Ensemble de verrous en mode écriture acquis par un \textit{thread T}\;
+ C(\textit{v}) = verrous possibles pour une variable \textit{v}\;
+ 
+ \For{Toute variable partagé \textit{v}}{
+ C(\textit{v}) = tous les verrous présents dans l'application
+ }
+ 
+ \For{Toute lecture d'une variable partagé \textit{v}}{
+ C(\textit{v}) = C(\textit{v}) $\cap$ Verrous(\textit{T})\;
+ \If{C(\textit{v}) == \{\}}{
+   Condition de course détectée 
+ }
+ }
+ 
+ \For{Toute écriture d'une variable partagé \textit{v}}{
+ C(\textit{v}) = C(\textit{v}) $\cap$ Verrous\_É(\textit{T})\;
+ \If{C(\textit{v}) == \{\}}{
+   Condition de course détectée 
+ }
+ }
+\end{algorithm}
+\end{frame}
 
-  \node[state]         (A) [text width=1.2cm] {Partagé-Modifié};
-\end{tikzpicture}
-
-\begin{textblock}{5}(8, 7)
-	 \textcolor{white}{TEST}
-\end{textblock}
+\section{Comparaison}
+\begin{frame}
+\frametitle{Comparaison}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+Arrivé-avant
+\begin{itemize}
+\item Aucun faux positif
+\end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+Ensemble de verrous
+\begin{itemize}
+\item Aucun faux négatif
+\end{itemize}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \section{Conclusion}

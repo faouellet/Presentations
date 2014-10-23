@@ -84,6 +84,7 @@
 class Account {
 private:
   int m_Balance;
+  std::mutex m_Mutex;
   
 public:
   void deposit(int n) {
@@ -372,7 +373,7 @@ void transfer(Account & From,
 \framesubtitle{Problèmes d'implémentation et de performance}
 \begin{itemize}
 \item Solution avec verrous: Comment être performant?
-\item Solution avec verrous: Voir présentation précédente
+\item Solution sans verrous: Voir présentation précédente
 \item Solution hybride: Requiert beaucoup de finesse
 \end{itemize}
 \end{frame}
@@ -381,7 +382,7 @@ void transfer(Account & From,
 \frametitle{Problèmes potentiels}
 \framesubtitle{Interactions avec code non-transactionnel}
 \begin{center}
-// Initialement: x\_b = true; x\_i = 0;
+// Initialement: x\_b = true;
 \end{center}
 \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -398,7 +399,7 @@ x_i = 100;
         \begin{lstlisting}        
 atomic {
   if (x_b) {
-    ++x_i;
+    x_i = 1;
   }
 }
         \end{lstlisting}

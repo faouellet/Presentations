@@ -283,30 +283,96 @@ Par exemple, 1 2 0 0 donne:
 
 \begin{frame}
 \frametitle{Protocole de cohérence}
-
+\begin{itemize}
+\item Assure que le contenu de multiples caches demeurent cohérent
+\item \textit{Directory-based} ou \textit{snooping}
+\item \textit{Write-through} facile à gérer
+\item \textit{Write-back} plus subtile
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Protocole MESI}
+\framesubtitle{Définitions}
+4 états possibles: 
+\begin{itemize}
+\item[M] $\rightarrow$ Modifiée: Copie modifiée d'une valeur en mémoire
+\item[E] $\rightarrow$ Exclusive: Copie propre d'une donnée en mémoire présente uniquement dans la cache courante
+\item[S] $\rightarrow$ Partagée: Copie propre d'une donnée en mémoire que plusieurs caches peuvent posséder
+\item[I] $\rightarrow$ Invalide: Ne peut être utilisée
+\end{itemize}
+\end{frame}
 
+\begin{frame}
+\frametitle{Protocole MESI}
+\framesubtitle{Illustration}
+\begin{center}
+\resizebox{5.9cm}{!}{
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=5cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+	\node[main node] (1) {Modifiée};
+    \node[main node] (2) [right of=1] {Exclusive};
+    \node[main node] (3) [below of=1] {Partagée};
+    \node[main node] (4) [right of=3] {Invalide};
+    
+    \path (1) edge [cyan, ->, bend left] (3);
+    \path (1) edge [yellow, ->, bend left] (4);
+    \path (1) edge [green, ->, loop above] (1);
+    \path (1) edge [red, ->, loop left] (1);
+    \path (2) edge [green, ->, loop above] (2);
+    \path (2) edge [red, ->] (1);
+    \path (2) edge [cyan, ->] (3);
+    \path (2) edge [yellow, ->, bend left] (4);
+    \path (3) edge [red, ->, bend left] (1);
+    \path (3) edge [yellow, ->, bend left] (4);
+    \path (3) edge [cyan, ->, loop left] (3);
+    \path (3) edge [green, ->, loop below] (3);
+    \path (4) edge [red, ->, bend left] (1);
+    \path (4) edge [green, ->, bend left] (2);
+    \path (4) edge [green, ->, bend left] (3);
+
+\end{tikzpicture}
+}
+\end{center}
+\begin{textblock}{5}(1, 7.8)
+\textcolor{red}{Écriture locale} \\
+\textcolor{green}{Lecture locale} \\
+\textcolor{cyan}{Lecture distante} \\
+\textcolor{yellow}{Écriture distante}
+\end{textblock}
 \end{frame}
 
 \section{Modèle insensible à la cache}
 \subsection{Concept}
 \begin{frame}
-\frametitle{Motivation}
+\frametitle{Concept}
 
 \end{frame}
 
 \subsection{Algorithmes}
 \begin{frame}
 \frametitle{Algorithmes}
+\begin{itemize}
+\item
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tri rapide}
 
 \end{frame}
 
 \subsection{Structures de données}
 \begin{frame}
 \frametitle{Structures de données}
+\begin{itemize}
+\item
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Arbre de van Emde Boas}
 
 \end{frame}
 

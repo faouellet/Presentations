@@ -105,7 +105,7 @@ Par exemple, 1 2 0 0 donne:
 \end{frame}
 
 \begin{frame}
-\frametitle{Modèle de base}
+\frametitle{Modèle académique}
 \begin{center}
 \begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
@@ -347,7 +347,33 @@ Par exemple, 1 2 0 0 donne:
 \subsection{Concept}
 \begin{frame}
 \frametitle{Concept}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+\begin{itemize}
+\item Conscience de l'existence d'une cache
+\item Inconscience des détails spécifiques
+\end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
+    \draw[white] (0, 0) rectangle (4, 0.75);
+    \draw[white] (0, 0.75) rectangle (4, 1.5);
+    \draw[white] (0, 1.5) rectangle (4, 2.25);
+    \draw[white] (0, 2.25) rectangle (4, 3);
+    \draw[white] (0, 3) rectangle (4, 3.75);
+    \draw[white] (0, 3.75) rectangle (4, 4.5);
+    
+    \draw[white] (-0.1, -0.03) -- (-0.3, -0.03) -- (-0.3, 4.5) -- (-0.1, 4.5) node (1) at (-0.7, 2.4) {$M$};
+    
+    \draw[white] (0, -0.1) -- (0, -0.3) -- (4, -0.3) -- (4, -0.1) node (1) at (2, -0.6) {$B$};
+   
+\end{tikzpicture}
+\end{center}
+    \end{column}
+\end{columns}
 \end{frame}
 
 \subsection{Algorithmes}
@@ -358,9 +384,42 @@ Par exemple, 1 2 0 0 donne:
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Tri rapide}
+\begin{frame}[fragile]
+\frametitle{Multiplication de matrices}
+\framesubtitle{Approche traditionnelle}
+\begin{lstlisting}
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++i)
+    for (int k = 0; k < N; ++k)
+      C[i][j] += A[i][k] * B[k][j];
+\end{lstlisting}
+\end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Multiplication de matrices}
+\framesubtitle{Approche optimisée}
+\begin{lstlisting}
+for(int i_0 = 0; i_0 < N; i_0+=b)
+  for(int j_0 = 0; j_0 < N; i_0+=b)
+    for (int i = i_0; i < min(i_0+b, N); ++i)
+      for (int j = j_0; j < min(j_0+b, N); ++j)
+        for(int k = 0; k < N; ++k)
+          C[i][j] += A[i][k] * B[k][j];
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Multiplication de matrices}
+\framesubtitle{Approche insensible à la cache}
+\begin{lstlisting}
+for(int i = 0; i < N; ++i) {
+  for(int j = 0; j < N; ++i) {
+    for(int k = 0; k < N; ++k) {
+      C[i][j] += A[i][k] * B[k][j];
+    }
+  }
+}
+\end{lstlisting}
 \end{frame}
 
 \subsection{Structures de données}
@@ -373,7 +432,45 @@ Par exemple, 1 2 0 0 donne:
 
 \begin{frame}
 \frametitle{Arbre de van Emde Boas}
+\begin{center}
+\begin{tikzpicture}[level distance=1.5cm,
+level 1/.style={sibling distance=5cm},
+level 2/.style={sibling distance=2.5cm},
+level 3/.style={sibling distance=1cm}]
+\tikzstyle{every node}=[circle,draw]
 
+\node (Root) {1}
+    child {
+    node {2} 
+    child { node {4}
+    		child { node {5} }
+    		child { node {6} } 
+    }
+    child { node {7}
+    		child { node {8} }
+    		child { node {9} }
+    }
+}
+child {
+    node {3}
+    child { node {10} 
+    		child { node {11} }
+    		child { node {12} }
+    }
+    child { node {13} 
+    		child { node {14} }
+    		child { node {15} }
+    }
+};
+
+\draw[teal] (-3, 0.4) rectangle (3, -1.9);
+\draw[teal] (-4.7, -2.5) rectangle (-2.8, -5);
+\draw[teal] (-2.2, -2.5) rectangle (-0.3, -5);
+\draw[teal] (0.3, -2.5) rectangle (2.2, -5);
+\draw[teal] (2.8, -2.5) rectangle (4.7, -5);
+
+\end{tikzpicture}
+\end{center}
 \end{frame}
 
 \section{Conclusion}
@@ -381,7 +478,8 @@ Par exemple, 1 2 0 0 donne:
 \frametitle{Conclusion}
 \begin{itemize}
 \item Les meilleures performances proviennent souvent d'un programme conscient de la cache.
-\item<2-> Une bonne utilisation de la cache en programmation parallèle demande par contre plus de finesse
+\item<2-> Une façon d'exploiter la localité est d'utiliser des algorithmes et des structures de données insensibles à la cache.
+\item<3-> Les algorithmes insensibles à la cache offrent des opportunités de parallélisation.
 \end{itemize}
 \end{frame}
 

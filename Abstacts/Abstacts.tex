@@ -150,31 +150,8 @@ Dans le monde de la programmation parallèle, les verrous sont souvent un mal n�
 
 \newpage
 
-\section*{Calcul approximatif et processeurs neuronaux}
-Au cours des dernières années, le monde de l'informatique a progressivement amorcer un virage vers la programmation parallèle. Les gains les plus souvent cités de ce virage sont ceux relevant de la performance des applications multiprogrammées. Cependant, il ne faudrait pas oublier que des gains ont aussi été faits au niveau de la consommation d'énergie. Dans cette présentation, j'introduirai un nouveau paradigme de programmation, le calcul approximatif, qui pousse encore plus loin cette idée d'économie d'énergie. De plus, je discuterai aussi d'un nouvel accélérateur basé sur les réseau de neurones développé pour supporter ce paradigme.
-\renewcommand\refname{Références NPU}
-\begin{thebibliography}{9}
-\bibitem{1}
-          Hadi Esmaeilzadeh et al.,
-          \emph{Neural Acceleration for General-Purpose Approximate Programs}.
-          Proceedings of the 2012 45th Annual IEEE/ACM International Symposium on Microarchitecture, 2012.
-          
-\bibitem{2}
-          Hadi Esmaeilzadeh et al.,
-          \emph{Neural Acceleration for General-Purpose Approximate Programs}.
-          Proceedings of the 2012 45th Annual IEEE/ACM International Symposium on Microarchitecture, 2012.
-          
-\bibitem{3}
-          Jie Han \& Michael Orshansky,
-          \emph{Approximate computing: An emerging paradigm for energy-efficient design}.
-          Proceedings of the 18th IEEE European Test Symposium, 2013.
-         
-\end{thebibliography}
-
-\newpage
-
-\section*{Détection de conditions de course}
-Il va sans dire, corriger un programme parallèle est une des tâches les plus ardues auxquelles un programmeur peut être confronté. Dans l'espoir d'aider les programmeurs à régler des problèmes de multiprogrammation, plusieurs outils de détection de conditions de course ont été développé. Cette présentation se voudra une introduction à la théorie et aux algorithmes traînant derrière de tels outils.
+\section*{Détection dynamique de conditions de course}
+Il va sans dire, corriger un programme parallèle est une des tâches les plus ardues auxquelles un programmeur peut être confronté. Dans l'espoir d'aider les programmeurs à régler des problèmes de multiprogrammation, plusieurs outils de détection de conditions de course ont été développés. Cette présentation se voudra une introduction à la théorie et aux algorithmes traînant derrière de tels outils.
 \renewcommand\refname{Références TSan}
 \begin{thebibliography}{9}
 \bibitem{1}
@@ -201,20 +178,52 @@ Il va sans dire, corriger un programme parallèle est une des tâches les plus a
 
 \newpage
 
-\section*{Algorithmes insensibles à la cache}
-Un bon algorithme devrait être conscient du fait qu'il sera exécuté sur une machine possédant une hiérarchie mémoire comportant souvent plusieurs paliers. Il ne devrait cependant pas être trop attaché à la hiérarchie mémoire d'un processeur donné pour ne pas perdre de sa portabilité. Dans cette présentation, j'explorerai cette idée d'algorithmes conscients sans trop être attachés à la cache dans le contexte de systèmes concurrents et parallèles.
-\renewcommand\refname{Références cache}
+\section*{Comportement et exploitation de la cache en multiprogrammation}
+Un bon algorithme devrait être conscient du fait qu'il sera exécuté sur une machine possédant une hiérarchie mémoire comportant souvent plusieurs paliers. Il ne devrait cependant pas être trop attaché à la hiérarchie mémoire d'un processeur donné pour ne pas perdre de sa portabilité. Cela est d'autant plus vrai lorsque l'algorithme est développé pour être exécuter sur une machine multi-coeurs. Dans cette présentation, j'introduirai brièvement le fonctionnement des caches modernes pour ensuite discuter d'algorithmes et de structures de données exploitant ces dernières.
+\renewcommand\refname{Références Cache}
 \begin{thebibliography}{9}
 \bibitem{1}
           Erik Demaine,
-          \emph{Programming in the Age of Concurrency: Software Transactional Memory}.
-          Lecture notes from the EEF summer school on massive data sets, 2002.
+          \emph{Cache-Oblivious Algorithms and Data Structures}.
+          Notes for MIT Computer Science 6.897: Advanced Data Structures, 2002.
           
 \bibitem{2}
           Harald Prokop,
           \emph{Cache-Oblivious Algorithms}.
           Master's thesis, 1999.
+          
+\bibitem{3}
+          Fabian Giesen
+          \emph{Cache Coherency Primer}.
+          http://fgiesen.wordpress.com/, 2014.
          
+\end{thebibliography}
+
+\newpage
+
+\section*{Compilation polyhédrale}
+Dans notre réalité de plus en plus axée sur la programmation parallèle, la parallélisation automatique est souvent considéré comme étant le but ultime à atteindre. Malheureusement, les avancées dans ce domaine de la compilation sont relativement faibles. Force est de constater que les anciennes méthodes utilisées pour découvrir et exploiter le parallélisme des applications sont insuffisantes. Dans cette présentation, j'offrirai un tour d'horizon du modèle de compilation polyhédral, un modèle récemment mis de l'avant avec Graphite (GCC) et Polly (LLVM) qui pourrait faire déboucher ce champ de recherche.
+\renewcommand\refname{Références Poly}
+\begin{thebibliography}{9}
+\bibitem{1}
+          Tobias Grosser,
+          \emph{Enabling Polyhedral Optimizations in LLVM}.
+          Master's thesis, 2011.
+
+\bibitem{1}
+          Ragesh A.,
+          \emph{A Framework for Automatic OpenMP Code Generation}.
+          Master's thesis, 2011.
+          
+\bibitem{1}
+          Tomofumi Yuki,
+          \emph{Beyond Shared Memory Loop Parallelism in the Polyhedral Model}.
+          PhD's thesis, 2013.
+          
+\bibitem{1}
+          Uday Bondhugula,
+          \emph{Effective Automatic Parallelization and Locality Optimization using the Polyhedral Model}.
+          PhD's thesis, 2010.                
 \end{thebibliography}
 
 \end{document}

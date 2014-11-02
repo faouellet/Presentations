@@ -54,7 +54,7 @@
 
 \institute{Université de Sherbrooke}
 
-\date{16 octobre 2014}
+\date{17 octobre 2014}
 
 \begin{document}
 
@@ -72,14 +72,18 @@
 \frametitle{Programmation parallèle traditionnelle}
 \framesubtitle{Exemple}
 \begin{lstlisting}
-void ThreadSafeIntStack::push(int val) {
-  std::lock_guard<std::mutex> lock(m_Mutex);
-  m_Stack.push(val);
-}
+std::mutex M1
+std::mutex M2;
 
-int ThreadSafeIntStack::pop() {
-  std::lock_guard<std::mutex> lock(m_Mutex);
-  m_Stack.pop();
+void ParallelFunction() {
+  std::lock_guard<std::mutex> Lock1(M1);
+  {
+    std::lock_guard<std::mutex> Lock2(M2);
+    {
+      /* Calcul quelconque utilisant 
+         des structures partagees */  
+    }
+  }    
 }
 \end{lstlisting}
 \end{frame}
@@ -97,7 +101,7 @@ Traditionnellement:
 \end{itemize}
 \end{frame}
 
-\section{Définition}
+\section{Définitions}
 \begin{frame}
 \frametitle{Définitions}
 Il existe diverses définitions selon le niveau de garanties fourni.
@@ -110,8 +114,8 @@ Il existe diverses définitions selon le niveau de garanties fourni.
 
 \defverbatim{\Wait}{%
 \begin{lstlisting}
-void IncrementRefCounter(Object *obj) {
-    atomic_increment(obj->rc);
+void IncrementRefCounter(Object *Obj) {
+    AtomicIncrement(Obj->RC);
 }
 \end{lstlisting}}
 
@@ -211,7 +215,11 @@ strd r0, r1, [r2]
 
 \only<2>{
 \begin{textblock}{5.5}(8, 7)
-	 {Le processeur va exécuter deux instructions \textit{store} sur 32 bits}
+	 {Le processeur peut exécuter deux instructions \textit{store} sur 32 bits}
+\end{textblock}
+
+\begin{textblock}{5.5}(8, 10)
+	 {- \textit{ARMv7-M Architecture Reference Manual}, \S A3.5.3}
 \end{textblock}
 }
 \end{frame}
@@ -221,7 +229,7 @@ strd r0, r1, [r2]
 \frametitle{Read-Modify-Write}
 \begin{itemize}
 \item Classe d'opérations atomiques
-\item Souvent utilisé pour implémenter des mutex
+\item Souvent utilisés pour implémenter des mutex
 \item Exécute une lecture et une écriture
 \end{itemize}
 \end{frame}
@@ -230,13 +238,13 @@ strd r0, r1, [r2]
 \frametitle{Compare-And-Swap}
 \framesubtitle{Haut niveau}
 \begin{lstlisting}
-int CompareAndSwap(int *reg, int swap,
-                   int compare) {
-  atomic {                   
-    int val = *reg;
-    if (compare == val)
-        *reg = swap;
-    return val;
+bool CompareAndSwap(int *reg, int oldValue,
+                   int newValue) {                   
+  if (*reg == oldValue) {
+    *reg = newValue;
+    return true;
+  } else {
+    return false;
   }
 }
 \end{lstlisting}
@@ -258,8 +266,8 @@ void LockFreeList::PushFront(Node *newHead) {
   for (;;) {
     Node *oldHead = m_Head;
     newHead->next = oldHead;
-    if (CompareAndSwap(&m_Head, newHead, 
-                       oldHead) == oldHead)
+    if (CompareAndSwap(
+                  &m_Head, oldHead, newHead))
       return;
   }
 }
@@ -282,8 +290,8 @@ void LockFreeList::PushFront(Node *newHead) {
   for (;;) {
     Node *oldHead = m_Head;
     newHead->next = oldHead;
-    if (CompareAndSwap(&m_Head, newHead, 
-                       oldHead) == oldHead)
+    if (CompareAndSwap(
+                  &m_Head, oldHead, newHead))
       return;
   }
 }

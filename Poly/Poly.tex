@@ -15,10 +15,12 @@
 {
 \begin{frame}<beamer>
 \frametitle{Plan}
+\footnotesize{
 \tableofcontents[
   currentsection,
   hideothersubsections
 ]
+}
 \end{frame}
 }
 
@@ -76,19 +78,34 @@
 \begin{frame}
 \frametitle{Problèmes courants}
 \framesubtitle{Optimisations des boucles}
-
+Les compilateurs modernes sont très loin derrière la théorie
+\begin{itemize}
+\item Fusion
+\item Tuilage
+\item \textit{Skewing}
+\item Etc...
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Problèmes courants}
 \framesubtitle{Parallélisation d'applications existantes}
-
+Comment améliorer la performance de \textit{legacy code}?
+\begin{itemize}
+\item Mettre tout à terre et recommencer
+\item Payer des développeurs pour améliorer des sections critiques
+\item Espérer qu'un outil améliore magiquement la situation
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Problèmes courants}
 \framesubtitle{Rendre le parallélisme accessible}
-
+On cherche toujours les meilleures abstractions pour le calcul parallèle
+\begin{itemize}
+\item \textit{Threads}
+\item Tâches
+\end{itemize}
 \end{frame}
 
 \section{Compilation traditionnelle}
@@ -103,42 +120,161 @@
 
 \begin{frame}
 \frametitle{Architecture usuelle}
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=4.5cm,
+  thick,main node/.style={rectangle,draw,font=\sffamily\Large\bfseries}]
 
+  \draw[white] (0, 0) rectangle (2, 3);
+  \draw[white] (2, 0) rectangle (4, 3);
+  \draw[white] (4, 0) rectangle (6, 3);
+  
+  \node[draw=none] (1) at (1, 1.5) {\textit{Frontend}};
+  \node[draw=none] (2) at (3, 1.5) {\textit{Optimizer}};
+  \node[draw=none] (3) at (5, 1.5) {\textit{Backend}};
+  \node[draw=none] (4) at (-1.5, 1.5) {Code source};
+  \node[draw=none] (5) at (7.5, 1.5) {Code machine};
+  
+\end{tikzpicture}
+\end{center}
+\begin{textblock}{6}(4, 9.65)
+	$\rightarrow$
+\end{textblock}
+\begin{textblock}{6}(12, 9.65)
+	$\rightarrow$
+\end{textblock}
 \end{frame}
 
 \subsection{Processus de compilation}
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Étape 1 - AST}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+    \footnotesize{
+\begin{lstlisting}
+int countOdd(int A[],
+             int N) {
+  int cpt = 0;
 
+  for (int i = 0; i < N; 
+       ++i)
+    if (A[i] % 2 == 1)
+      cpt++;
+
+  return cpt;
+}
+\end{lstlisting}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\colorbox{white}{\includegraphics[scale=0.15]{AST.png}}
+    \end{column}
+\end{columns}
+\begin{textblock}{6}(7.1, 9)
+	\Huge{$\Rightarrow$}
+\end{textblock}
 \end{frame}
 
 \begin{frame}
 \frametitle{Étape 2 - CFG}
-
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+\colorbox{white}{\includegraphics[scale=0.15]{AST.png}}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.13]{cfg.png}}
+\end{center}
+    \end{column}
+\end{columns}
+\begin{textblock}{6}(8.35, 9)
+	\Huge{$\Rightarrow$}
+\end{textblock}
 \end{frame}
 
 \begin{frame}
 \frametitle{Représentation intermédiaire}
-POURQUOI ??
+\framesubtitle{Illustration}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.7]{basic block.png}}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Représentation intermédiaire}
+\framesubtitle{Raisonnement}
 \begin{itemize}
-\item 
+\item Mieux analyser le programme donné
+\item Permettre des optimisations indépendantes de la machine
+\item Vérifier les optimisations effectuées
 \end{itemize}
 \end{frame}
 
-\subsection{Analyse de dépendences}
+\section{Analyse de dépendences}
 \begin{frame}
-\frametitle{Importance des dépendences}
+\frametitle{Définition}
+Situation dans laquelle deux instructions accèdent à la même donnée.
+\end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Importance des dépendences}
+Indique quelles transformations sont légales \\
+\begin{lstlisting}
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++j)
+    A[i][j] = A[i+1][j-1];
+\end{lstlisting}
+\begin{textblock}{6}(11, 8)
+	\begin{itemize}
+	\item[\checkmark] Déroulement
+	\item[$\times$] Inter-échange
+	\end{itemize}
+\end{textblock}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Importance des dépendences}
+Indique les opportunités de parallélisme \\
+\begin{lstlisting}
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++j)
+    A[i][j] = A[i+1][j-1];
+
+\end{lstlisting}
+\begin{itemize}
+\item Parallélisme d'intructions au niveau de la boucle interne
+\item Parallélisme de fils d'exécution au niveau de la boucle externe
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Représentation}
+\framesubtitle{Vecteur de distance}
+Vecteur \textbf{d(i, j)} tel que \textbf{d(i, j)$_{k}$} = \textbf{j}$_{k}$ - \textbf{i}$_{k}$ où \textbf{i} et \textbf{j} sont des vecteurs d'itérations.
+\end{frame}
 
+\begin{frame}
+\frametitle{Représentation}
+\framesubtitle{Vecteur de direction}
+Vecteur \textbf{D(i, j)} tel que: 
+\[ D(i, j)_{k} = \left\{
+  \begin{array}{l l}
+    "<" & \quad \text{si $d(i, j)_{k}$ > 0}\\
+    "=" & \quad \text{si $d(i, j)_{k}$ = 0}\\
+    ">" & \quad \text{si $d(i, j)_{k}$ < 0}
+  \end{array} \right.\]
 \end{frame}
 
 \begin{frame}
 \frametitle{Tests de dépendences}
 
+\end{frame}
+
+\begin{frame}
+\frametitle{Points à améliorer}
+Ce modèle éprouve de la difficulté au niveau de:
+\begin{itemize}
+\item Parallélisme autre qu'au niveau des intructions 
+\item Distribution de données
+\end{itemize}
 \end{frame}
 
 \section{Approche polyhédrale}
@@ -165,7 +301,17 @@ POURQUOI ??
 
 \end{frame}
 
-\subsection{Schedule}
+\subsection{Mémoire partagée}
+\begin{frame}
+\frametitle{Mémoire partagée}
+
+\end{frame}
+
+\subsection{Mémoire distribuée}
+\begin{frame}
+\frametitle{Mémoire distribuée}
+
+\end{frame}
 
 \subsection{Support présent}
 \begin{frame}
@@ -181,6 +327,10 @@ POURQUOI ??
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
+\begin{itemize}
+\item Offre une façon différente de raisonner sur l'optimisation de boucles et la parallélisation automatique
+\item Représente possiblement la meilleure chance de produire du parallélisme implicite
+\end{itemize}
 \end{frame}
 
 \end{document}

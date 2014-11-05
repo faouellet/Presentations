@@ -380,8 +380,41 @@ Par exemple, 1 2 0 0 donne:
 \begin{frame}
 \frametitle{Algorithmes}
 \begin{itemize}
-\item
+\item Paramétrés par M et B
+\item Algorithmes souvent récursifs
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Élimination de la récursion}
+Les compilateurs modernes comprennent la récursivité et peuvent l'optimiser dans certains cas. Par exemple:
+\\
+\begin{columns}
+    \begin{column}{0.6\textwidth}
+    \footnotesize{
+    \begin{lstlisting}
+int factorial(int x) {
+  if(x > 1)
+    return x * factorial(x-1);
+  else return 1;
+}
+\end{lstlisting}}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+    \footnotesize{
+    \begin{lstlisting}
+int factorial(int x) {
+  in result = 1;
+  while(x > 1)
+    result *= x--;
+  return result;
+}
+\end{lstlisting}}
+    \end{column}
+\end{columns}
+\begin{textblock}{5}(8.7, 9.5)
+	 \Huge{$\Rightarrow$}
+\end{textblock}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -393,6 +426,27 @@ for (int i = 0; i < N; ++i)
     for (int k = 0; k < N; ++k)
       C[i][j] += A[i][k] * B[k][j];
 \end{lstlisting}
+
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+    \draw[white] (0, 0) rectangle (3, 3);
+    \draw[white] (4, 0) rectangle (7, 3);
+    \draw[white] (8, 0) rectangle (11, 3);
+    
+    \draw[fill=blue] (0, 0) rectangle (0.25, 3);
+    \draw[fill=blue] (4, 2.75) rectangle (7, 3);
+    \draw[fill=blue] (8, 2.75) rectangle (8.25, 3);
+ 
+\end{tikzpicture}
+
+\begin{textblock}{5}(5.25, 11)
+	 \Huge{$\times$}
+\end{textblock}
+
+\begin{textblock}{5}(10.25, 11.2)
+	 \Huge{$=$}
+\end{textblock}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -406,19 +460,37 @@ for(int i_0 = 0; i_0 < N; i_0+=b)
         for(int k = 0; k < N; ++k)
           C[i][j] += A[i][k] * B[k][j];
 \end{lstlisting}
+
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+    \draw[white] (0, 0) rectangle (3, 3);
+    \draw[white] (4, 0) rectangle (7, 3);
+    \draw[white] (8, 0) rectangle (11, 3);
+    
+    \draw[fill=blue] (0, 0) rectangle (.75, 3);
+    \draw[fill=blue] (4, 2.25) rectangle (7, 3);
+    \draw[fill=blue] (8, 2.25) rectangle (8.75, 3);
+ 
+\end{tikzpicture}
+
+\begin{textblock}{5}(5.25, 11)
+	 \Huge{$\times$}
+\end{textblock}
+
+\begin{textblock}{5}(10.25, 11.2)
+	 \Huge{$=$}
+\end{textblock}
 \end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Multiplication de matrices}
 \framesubtitle{Approche insensible à la cache}
 \begin{lstlisting}
-for(int i = 0; i < N; ++i) {
-  for(int j = 0; j < N; ++i) {
-    for(int k = 0; k < N; ++k) {
+for(int i = 0; i < N; ++i)
+  for(int j = 0; j < N; ++i)
+    for(int k = 0; k < N; ++k)
       C[i][j] += A[i][k] * B[k][j];
-    }
-  }
-}
 \end{lstlisting}
 \end{frame}
 
@@ -426,7 +498,9 @@ for(int i = 0; i < N; ++i) {
 \begin{frame}
 \frametitle{Structures de données}
 \begin{itemize}
-\item
+\item Structures souvent récursives
+\item Tentative d'offrir des versions statiques de structures dynamiques
+\item Insertion et suppression sophistiquées pour une structure contigue
 \end{itemize}
 \end{frame}
 
@@ -471,6 +545,21 @@ child {
 
 \end{tikzpicture}
 \end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Insertion}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Suppression}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Recherche}
+
 \end{frame}
 
 \section{Conclusion}

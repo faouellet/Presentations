@@ -27,7 +27,8 @@
                 keywordstyle=\color{green}\ttfamily,
                 stringstyle=\color{red}\ttfamily,
                 commentstyle=\color{cyan}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#}
+                morecomment=[l][\color{magenta}]{\#},
+                escapechar=@
 }
 
 \setbeamercolor{normal text}{fg=white,bg=black!90}
@@ -518,22 +519,98 @@ Trois problèmes de l'algorithme précédent
 \end{frame}
 
 \section{Comparaison}
+\subsection{Implémentation}
 \begin{frame}
-\frametitle{Comparaison}
+\frametitle{Implémentation}
+\framesubtitle{Instrumentation}
+\begin{itemize}
+\item Recompilation dynamique de binaires
+\item Fait souvent appel à de la \textit{shadow memory}
+\item Ne diffère que dans les instructions visés
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Implémentation}
+\framesubtitle{Annotations}
+Pour aider le processus de détections, les outils offrent souvent la possibilité d'annoter un programe. Par exemple: 
 \begin{columns}
-    \begin{column}{0.5\textwidth}
-Arrivé-avant
-\begin{itemize}
-\item Aucun faux positif
-\end{itemize}
+    \begin{column}{0.6\textwidth}
+    \begin{center}
+ThreadSanitizer  
+    \end{center}
+    \footnotesize{
+    \begin{lstlisting}
+ANNOTATE_IGNORE_WRITES_BEGIN
+ANNOTATE_IGNORE_WRITES_END
+ANNOTATE_CONDVAR_LOCK_WAIT(cv, mu)
+ANNOTATE_BENIGN_RACE(ptr)
+\end{lstlisting}}
     \end{column}
-    \begin{column}{0.5\textwidth}
-Ensemble de verrous
-\begin{itemize}
-\item Aucun faux négatif
-\end{itemize}
+    \begin{column}{0.4\textwidth}
+    \begin{center}
+Eraser    
+    \end{center}
+    \footnotesize{
+    \begin{lstlisting}
+EraserReadLock(lock)
+EraserReadUnLock(lock)
+EraserWriteLock(lock)
+EraserWriteUnLock(lock)
+\end{lstlisting}}
     \end{column}
 \end{columns}
+\end{frame}
+
+\subsection{Conditions de course détectées}
+\begin{frame}[fragile]
+\frametitle{Cas non détecté par arrivé-avant}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+    \begin{center}
+Thread 1  
+    \end{center}
+    \begin{lstlisting}
+  Y += 1;
+  Mutex.lock();
+  V += 1;
+  Mutex.unlock();
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+    \begin{center}
+Thread 2    
+    \end{center}
+    \begin{lstlisting}
+  Mutex.lock();
+  V += 1;
+  Mutex.unlock();
+  Y += 1;
+\end{lstlisting}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Cas non détecté par ensemble de verrous}
+\begin{lstlisting}
+int main() {
+  int X = 0;
+  std::thread T([&](){ X++; });
+  X += 42;
+  T.join();
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+\frametitle{Résumé}
+Les faits importants à retenir:
+\begin{itemize}
+\item Arrivé-avant détecte moins de conditions de course que l'ensemble de verrous
+\item L'ensemble de verrou peut produire des faux positifs contrairement à arrivé-avant
+\item Les deux algorithmes peuvent produire des faux négatifs
+\end{itemize}
 \end{frame}
 
 \section{Conclusion}

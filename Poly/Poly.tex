@@ -251,16 +251,44 @@ for (int i = 0; i < N; ++i)
 Vecteur \textbf{d(i, j)} tel que \textbf{d(i, j)$_{k}$} = \textbf{j}$_{k}$ - \textbf{i}$_{k}$ où \textbf{i} et \textbf{j} sont des vecteurs d'itérations.
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Représentation}
+\framesubtitle{Vecteur de distance}
+\begin{lstlisting}
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < M; ++j)
+    for (int k = 0; k < L; ++k)
+      A[i+1][j][k-1] = A[i][j][k] + 10;
+    
+\end{lstlisting}
+
+\textbf{d(i, j)$_{k} = (-1, 0, 1)$}
+\end{frame}
+
 \begin{frame}
 \frametitle{Représentation}
 \framesubtitle{Vecteur de direction}
 Vecteur \textbf{D(i, j)} tel que: 
 \[ D(i, j)_{k} = \left\{
   \begin{array}{l l}
-    "<" & \quad \text{si $d(i, j)_{k}$ > 0}\\
-    "=" & \quad \text{si $d(i, j)_{k}$ = 0}\\
-    ">" & \quad \text{si $d(i, j)_{k}$ < 0}
+    "<" & \quad \text{si $d(i, j)_{k} > 0$}\\
+    "=" & \quad \text{si $d(i, j)_{k} = 0$}\\
+    ">" & \quad \text{si $d(i, j)_{k} < 0$}
   \end{array} \right.\]
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Représentation}
+\framesubtitle{Vecteur de direction}
+\begin{lstlisting}
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < M; ++j)
+    for (int k = 0; k < L; ++k)
+      A[i+1][j][k-1] = A[i][j][k] + 10;
+    
+\end{lstlisting}
+
+\textbf{D(i, j)$_{k} = (<, =, >)$}
 \end{frame}
 
 \begin{frame}
@@ -272,7 +300,8 @@ Vecteur \textbf{D(i, j)} tel que:
 \frametitle{Points à améliorer}
 Ce modèle éprouve de la difficulté au niveau de:
 \begin{itemize}
-\item Parallélisme autre qu'au niveau des intructions 
+\item Parallélisme de niveau plus haut niveau que celui des instructions
+\item Parallélisme de tâches
 \item Distribution de données
 \end{itemize}
 \end{frame}

@@ -195,7 +195,7 @@ Suite d'opérations effectuées par un \textit{thread} se terminant par une opé
   \node[main node] (1) [] {};
   \node[main node] (2) [right of=1] {};
   \node[main node] (3) [right of=2] {};
-  \node[main node] (4) [right of=1] {};
+  \node[main node] (4) [below of=1] {};
   \node[main node] (5) [right of=5, below of=1] {};
   \node[main node] (6) [right of=6, below of=2] {};
 
@@ -284,11 +284,11 @@ Deux accès mémoire dont au moins un est une écriture et qui pourraient être 
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
   \node (1) [label={above:$T$}] {};
-  \node[main node] (2) [below of=1, label={above left:x=1}, label={below left:(2, 2)}] {};
+  \node[main node] (2) [below of=1, label={above left:X=42}, label={below left:(2, 2)}] {};
   \node (3) [below of=2] {};
   
   \node (4) [right of=1, label={above:$T^{\prime}$}] {};
-  \node[main node] (5) [below of=4, label={above right:if(x==1)}, label={below right:(2, 2)}] {};
+  \node[main node] (5) [below of=4, label={above right:X=43}, label={below right:(2, 2)}] {};
   \node (6) [below of=5] {};
 
   \path[every node/.style={font=\sffamily\small}]
@@ -330,11 +330,11 @@ Il y a une condition de course entre un segment $S$ et un segment $S^{\prime}$ s
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
   \node (1) [] {};
-  \node[main node] (2) [below of=1, label={above left:x=1}, label={below left:(2, 2)}] {};
+  \node[main node] (2) [below of=1, label={above left:X=42}, label={below left:(2, 2)}] {};
   \node (3) [below of=2] {};
   
   \node (4) [right of=1] {};
-  \node[main node] (5) [below of=4, label={above right:if(x==1)}, label={below right:(2, 2)}] {};
+  \node[main node] (5) [below of=4, label={above right:X=43}, label={below right:(2, 2)}] {};
   \node (6) [below of=5] {};
 
   \path[every node/.style={font=\sffamily\small}]
@@ -466,30 +466,6 @@ Trois problèmes de l'algorithme précédent
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Algorithme}
-\framesubtitle{Raffinement}
-\begin{center}
-\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
-                    semithick]
-  \tikzstyle{every state}=[text=white]
-
-  \node[state]         (A)                    {Exclusif};
-  \node[state]         (B) [above left of=A] {Vierge};
-  \node[state]         (D) [below left of=A] {Partagé};
-  \node[state]         (C) [below right of=A, text width=1.2cm] {Partagé-Modifié};
-
-  \path (A) edge [bend right] node {L} (D)
-            edge [bend left]  node {E, $T_{i>1}$} (C)
-            edge [loop above]  node {L/E, $T_{1}$} (A)
-        (B) edge [bend right] node {E} (A)
-        (D) edge [bend right] node {E} (C)
-        (D) edge [loop left]  node {L} (B)
-        ;
-\end{tikzpicture}
-\end{center}
-\end{frame}
-
 \begin{frame}[shrink=25]
 \frametitle{Algorithme}
 \framesubtitle{Raffinement}
@@ -516,6 +492,30 @@ Trois problèmes de l'algorithme précédent
  }
  }
 \end{algorithm}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithme}
+\framesubtitle{Raffinement}
+\begin{center}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick]
+  \tikzstyle{every state}=[text=white]
+
+  \node[state]         (A)                    {Exclusif};
+  \node[state]         (B) [above left of=A] {Vierge};
+  \node[state]         (D) [below left of=A] {Partagé};
+  \node[state]         (C) [below right of=A, text width=1.2cm] {Partagé-Modifié};
+
+  \path (A) edge [bend right] node {L} (D)
+            edge [bend left]  node {E, $T_{i>1}$} (C)
+            edge [loop above]  node {L/E, $T_{1}$} (A)
+        (B) edge [bend right] node {E} (A)
+        (D) edge [bend right] node {E} (C)
+        (D) edge [loop left]  node {L} (B)
+        ;
+\end{tikzpicture}
+\end{center}
 \end{frame}
 
 \section{Comparaison}

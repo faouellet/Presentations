@@ -434,8 +434,8 @@ for (int i = 0; i < N; ++i)
     \draw[white] (4, 0) rectangle (7, 3);
     \draw[white] (8, 0) rectangle (11, 3);
     
-    \draw[fill=blue] (0, 0) rectangle (0.25, 3);
-    \draw[fill=blue] (4, 2.75) rectangle (7, 3);
+    \draw[fill=blue] (0, 2.75) rectangle (3, 3);
+    \draw[fill=blue] (4, 0) rectangle (4.25, 3);
     \draw[fill=blue] (8, 2.75) rectangle (8.25, 3);
  
 \end{tikzpicture}
@@ -453,12 +453,13 @@ for (int i = 0; i < N; ++i)
 \frametitle{Multiplication de matrices}
 \framesubtitle{Approche optimisée}
 \begin{lstlisting}
-for(int i_0 = 0; i_0 < N; i_0+=b)
-  for(int j_0 = 0; j_0 < N; i_0+=b)
-    for (int i = i_0; i < min(i_0+b, N); ++i)
-      for (int j = j_0; j < min(j_0+b, N); ++j)
-        for(int k = 0; k < N; ++k)
-          C[i][j] += A[i][k] * B[k][j];
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++i)
+      B[i][j] = B[j][i];
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++i)
+    for (int k = 0; k < N; ++k)
+      C[i][j] += A[i][k] * B[j][k];
 \end{lstlisting}
 
 \begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
@@ -468,9 +469,9 @@ for(int i_0 = 0; i_0 < N; i_0+=b)
     \draw[white] (4, 0) rectangle (7, 3);
     \draw[white] (8, 0) rectangle (11, 3);
     
-    \draw[fill=blue] (0, 0) rectangle (.75, 3);
-    \draw[fill=blue] (4, 2.25) rectangle (7, 3);
-    \draw[fill=blue] (8, 2.25) rectangle (8.75, 3);
+    \draw[fill=blue] (0, 2.75) rectangle (3, 3);
+    \draw[fill=blue] (4, 2.75) rectangle (7, 3);
+    \draw[fill=blue] (8, 2.75) rectangle (8.25, 3);
  
 \end{tikzpicture}
 

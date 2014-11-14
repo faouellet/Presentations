@@ -166,6 +166,14 @@ Par exemple, 1 2 0 0 donne:
 \end{textblock}
 \end{frame}
 
+\begin{frame}
+\frametitle{Architecture multi-coeurs}
+\begin{itemize}
+\item Plus de coeurs veut souvent dire réduction de la taille de cache par coeurs
+\item Mauvaise gestion de la cache peut faire perdre tous les gains potentiels du parallélisme
+\end{itemize}
+\end{frame}
+
 \section{Fonctionnement de la cache}
 \subsection{Concepts de base}
 \begin{frame}
@@ -206,6 +214,7 @@ Par exemple, 1 2 0 0 donne:
 \begin{itemize}
 \item En général, les processeurs ne peuvent accéder directement à la mémoire
 \item Les accès mémoire se font au travers d'une hiérarchie de caches
+\item Les lectures se font par blocs (\textit{cache lines})
 \end{itemize}
 \end{frame}
 
@@ -217,18 +226,17 @@ Par exemple, 1 2 0 0 donne:
 	\draw[white] (0, 0) rectangle (1.45, 1.3);
 	\draw[white] (1, 0) rectangle (1.45, 1.3);
 	\onslide<2>{\draw[red] (1, 0) rectangle (1.45, 1.3);}
-	\onslide<9->{\draw[green] (1, 0) rectangle (1.45, 1.3);}
+	\onslide<8->{\draw[green] (1, 0) rectangle (1.45, 1.3);}
 	\draw[white] (0, 2.7) rectangle (1.45, 4);
 	\draw[white] (1, 2.7) rectangle (1.45, 4);
 	\draw[white] (2, 0) rectangle (3, 4);
 	\onslide<3>{\draw[red] (2, 0) rectangle (3, 4);}
-	\onslide<8->{\draw[green] (2, 0) rectangle (3, 4);}
+	\onslide<7->{\draw[green] (2, 0) rectangle (3, 4);}
 	\draw[white] (3.5, -1) rectangle (5.5, 5);
 	\onslide<4>{\draw[red] (3.5, -1) rectangle (5.5, 5);}
-	\onslide<7->{\draw[green] (3.5, -1) rectangle (5.5, 5);}
+	\onslide<6->{\draw[green] (3.5, -1) rectangle (5.5, 5);}
     \draw[white] (6, -1) rectangle (11, 5);
-    \onslide<5>{\draw[red] (6, -1) rectangle (11, 5);}
-    \onslide<6->{\draw[green] (6, -1) rectangle (11, 5);}
+    \onslide<5->{\draw[green] (6, -1) rectangle (11, 5);}
     
     \node (1) at (0.5, 0.65) {CPU};
     \node (2) at (0.5, 3.35) {CPU};
@@ -253,7 +261,15 @@ Par exemple, 1 2 0 0 donne:
 
 \begin{frame}
 \frametitle{Écriture}
-\framesubtitle{\textit{Write-through}}
+Deux approches:
+\begin{itemize}
+\item \textit{Write-through}
+\item \textit{Write-back}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{\textit{Write-through}}
 \begin{itemize}
 \item Le contenu de la cache et de la mémoire sont mis à jour simultanément
 \item Le contenu de chaque cache est identique au contenu de la mémoire en tout temps
@@ -262,8 +278,7 @@ Par exemple, 1 2 0 0 donne:
 \end{frame}
 
 \begin{frame}
-\frametitle{Écriture}
-\framesubtitle{\textit{Write-back}}
+\frametitle{\textit{Write-back}}
 \begin{itemize}
 \item La mise à jour de la mémoire est différée à des moments précis
 \begin{itemize}
@@ -283,11 +298,35 @@ Par exemple, 1 2 0 0 donne:
 
 \begin{frame}
 \frametitle{Protocole de cohérence}
+Assurer que le contenu de multiples caches demeurent cohérent
 \begin{itemize}
-\item Assure que le contenu de multiples caches demeurent cohérent
-\item \textit{Directory-based} ou \textit{snooping}
-\item \textit{Write-through} facile à gérer
-\item \textit{Write-back} plus subtile
+\item Toutes les écritures sont éventuellement vues par une lecture
+\item Ordonnancement des écritures
+\end{itemize}
+
+Deux grandes familles de protocole
+\begin{itemize}
+\item Cohérence par répertoire
+\item Cohérence par espionnage
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Cohérence par répertoire}
+\begin{itemize}
+\item Répertoire central conservant des informations sur ce qui est partagé
+\item Messages inter-processeurs pour faire la requête de données
+\item \textit{Scale} mieux
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Cohérence par espionnage}
+\framesubtitle{Concept}
+\begin{itemize}
+\item Tout les processeurs espionnent le bus
+\item Une seule cache effectue une lecture ou une écriture en mémoire dans un cycle donné
+\item Que faire avec écriture de type \textit{write-back}?
 \end{itemize}
 \end{frame}
 
@@ -352,6 +391,8 @@ Par exemple, 1 2 0 0 donne:
 \begin{itemize}
 \item Conscience de l'existence d'une cache
 \item Inconscience des détails spécifiques
+\item Paramétrés par M et B
+\item Algorithmes souvent récursifs (diviser pour régner)
 \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -374,15 +415,6 @@ Par exemple, 1 2 0 0 donne:
 \end{center}
     \end{column}
 \end{columns}
-\end{frame}
-
-\subsection{Algorithmes}
-\begin{frame}
-\frametitle{Algorithmes}
-\begin{itemize}
-\item Paramétrés par M et B
-\item Algorithmes souvent récursifs
-\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -495,71 +527,8 @@ for(int i = 0; i < N; ++i)
 \end{lstlisting}
 \end{frame}
 
-\subsection{Structures de données}
 \begin{frame}
-\frametitle{Structures de données}
-\begin{itemize}
-\item Structures souvent récursives
-\item Tentative d'offrir des versions statiques de structures dynamiques
-\item Insertion et suppression sophistiquées pour une structure contigue
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Arbre de van Emde Boas}
-\begin{center}
-\begin{tikzpicture}[level distance=1.5cm,
-level 1/.style={sibling distance=5cm},
-level 2/.style={sibling distance=2.5cm},
-level 3/.style={sibling distance=1cm}]
-\tikzstyle{every node}=[circle,draw]
-
-\node (Root) {1}
-    child {
-    node {2} 
-    child { node {4}
-    		child { node {5} }
-    		child { node {6} } 
-    }
-    child { node {7}
-    		child { node {8} }
-    		child { node {9} }
-    }
-}
-child {
-    node {3}
-    child { node {10} 
-    		child { node {11} }
-    		child { node {12} }
-    }
-    child { node {13} 
-    		child { node {14} }
-    		child { node {15} }
-    }
-};
-
-\draw[teal] (-3, 0.4) rectangle (3, -1.9);
-\draw[teal] (-4.7, -2.5) rectangle (-2.8, -5);
-\draw[teal] (-2.2, -2.5) rectangle (-0.3, -5);
-\draw[teal] (0.3, -2.5) rectangle (2.2, -5);
-\draw[teal] (2.8, -2.5) rectangle (4.7, -5);
-
-\end{tikzpicture}
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Insertion}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Suppression}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Recherche}
+\frametitle{Comparaison}
 
 \end{frame}
 

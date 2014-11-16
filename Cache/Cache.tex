@@ -335,9 +335,9 @@ Deux grandes familles de protocole
 \framesubtitle{Définitions}
 4 états possibles: 
 \begin{itemize}
-\item[M] $\rightarrow$ Modifiée: Copie modifiée d'une valeur en mémoire
-\item[E] $\rightarrow$ Exclusive: Copie propre d'une donnée en mémoire présente uniquement dans la cache courante
-\item[S] $\rightarrow$ Partagée: Copie propre d'une donnée en mémoire que plusieurs caches peuvent posséder
+\item[M] $\rightarrow$ Modifié: Copie modifiée d'une valeur en mémoire
+\item[E] $\rightarrow$ Exclusif: Copie propre d'une donnée en mémoire présente uniquement dans la cache courante
+\item[S] $\rightarrow$ Partagé: Copie propre d'une donnée en mémoire que plusieurs caches peuvent posséder
 \item[I] $\rightarrow$ Invalide: Ne peut être utilisée
 \end{itemize}
 \end{frame}
@@ -350,9 +350,9 @@ Deux grandes familles de protocole
 \begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=5cm,
   thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
-	\node[main node] (1) {Modifiée};
-    \node[main node] (2) [right of=1] {Exclusive};
-    \node[main node] (3) [below of=1] {Partagée};
+	\node[main node] (1) {Modifié};
+    \node[main node] (2) [right of=1] {Exclusif};
+    \node[main node] (3) [below of=1] {Partagé};
     \node[main node] (4) [right of=3] {Invalide};
     
     \path (1) edge [cyan, ->, bend left] (3);
@@ -382,6 +382,21 @@ Deux grandes familles de protocole
 \end{textblock}
 \end{frame}
 
+
+\begin{frame}
+\frametitle{Protocole MESI}
+\framesubtitle{Grandes lignes}
+L'important à retenir est:
+\begin{enumerate}
+\item Pour écrire, un coeur doit obtenir un accès exclusif pour écrire dans une \textit{cache line}
+\item Pour lire, un coeur doit faire passer l'état d'une \textit{cache line} à l'état \textit{Modifié}
+\end{enumerate}
+
+\only<2>{
+\textbf{Pour être performant, il faut lire et écrire le plus localement possible }
+}
+\end{frame}
+
 \section{Modèle insensible à la cache}
 \subsection{Concept}
 \begin{frame}
@@ -391,8 +406,6 @@ Deux grandes familles de protocole
 \begin{itemize}
 \item Conscience de l'existence d'une cache
 \item Inconscience des détails spécifiques
-\item Paramétrés par M et B
-\item Algorithmes souvent récursifs (diviser pour régner)
 \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -415,6 +428,16 @@ Deux grandes familles de protocole
 \end{center}
     \end{column}
 \end{columns}
+\end{frame}
+
+\subsection{Algorithme}
+\begin{frame}
+\frametitle{Algorithmes insensibles à la cache}
+\begin{itemize}
+\item Réduire la taille des données traitées pour qu'elles rentrent en cache
+\item Doit profiter de la hiérarchie mémoire d'une machine peu importe ces caractéristiques
+\item Algorithmes souvent récursifs
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -507,11 +530,11 @@ for (int i = 0; i < N; ++i)
  
 \end{tikzpicture}
 
-\begin{textblock}{5}(5.25, 11)
+\begin{textblock}{5}(5.25, 12)
 	 \Huge{$\times$}
 \end{textblock}
 
-\begin{textblock}{5}(10.25, 11.2)
+\begin{textblock}{5}(10.25, 12.2)
 	 \Huge{$=$}
 \end{textblock}
 \end{frame}
@@ -519,24 +542,161 @@ for (int i = 0; i < N; ++i)
 \begin{frame}[fragile]
 \frametitle{Multiplication de matrices}
 \framesubtitle{Approche insensible à la cache}
-\begin{lstlisting}
-for(int i = 0; i < N; ++i)
-  for(int j = 0; j < N; ++i)
-    for(int k = 0; k < N; ++k)
-      C[i][j] += A[i][k] * B[k][j];
-\end{lstlisting}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=3cm,
+  thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+    \draw[white] (0, 0) rectangle (3, 3);
+    \draw[white] (4, 0) rectangle (7, 3);
+    \draw[white] (8, 0) rectangle (11, 3);
+    
+    \draw (0, 0) rectangle (1.5, 1.5);
+    \draw (1.5, 1.5) rectangle (3, 3);    
+    
+    \draw (4, 0) rectangle (5.5, 1.5);
+    \draw (5.5, 1.5) rectangle (7, 3);
+    
+    \draw (8, 0) rectangle (9.5, 1.5);
+    \draw (9.5, 1.5) rectangle (11, 3);
+     
+\end{tikzpicture}
+
+\begin{textblock}{5}(1.65, 7.1)
+	 \Huge{A1}
+\end{textblock}
+
+\begin{textblock}{5}(1.65, 9.6)
+	 \Huge{A2}
+\end{textblock}
+
+\begin{textblock}{5}(3.5, 7.1)
+	 \Huge{A3}
+\end{textblock}
+
+\begin{textblock}{5}(3.5, 9.6)
+	 \Huge{A4}
+\end{textblock}
+
+\begin{textblock}{5}(6.65, 7.1)
+	 \Huge{B1}
+\end{textblock}
+
+\begin{textblock}{5}(6.65, 9.6)
+	 \Huge{B2}
+\end{textblock}
+
+\begin{textblock}{5}(8.5, 7.1)
+	 \Huge{B3}
+\end{textblock}
+
+\begin{textblock}{5}(8.5, 9.6)
+	 \Huge{B4}
+\end{textblock}
+
+\begin{textblock}{1}(11.55, 5.6)
+\begin{center}
+A1xB1 + A2xB3
+\end{center}	 
+\end{textblock}
+
+\begin{textblock}{1}(11.55, 8.1)
+\begin{center}
+	 A1xB2 + A2xB4
+	 \end{center}	
+\end{textblock}
+
+\begin{textblock}{1}(13.45, 5.6)
+\begin{center}
+	 A3xB1 + A4xB3
+	 \end{center}	
+\end{textblock}
+
+\begin{textblock}{1}(13.45, 8.1)
+\begin{center}
+	 A3xB2 + A4xB4
+	 \end{center}	
+\end{textblock}
+
+\begin{textblock}{5}(5.25, 8.5)
+	 \Huge{$\times$}
+\end{textblock}
+
+\begin{textblock}{5}(10.25, 8.7)
+	 \Huge{$=$}
+\end{textblock}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Comparaison}
+\framesubtitle{Mise en contexte}
+\begin{itemize}
+\item Test séquentiel
+\item Compilateur: g++ 4.8.3
+\item Option d'optimisation: -O2
+\item Processeur: 
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Comparaison}
+\framesubtitle{Résultats personnels}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.4]{matmult_all.png}}
+\end{center}
+\end{frame}
 
+\begin{frame}
+\frametitle{Comparaison}
+\framesubtitle{Résultats personnels}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.4]{matmult.png}}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparaison}
+\framesubtitle{CARMA}
+\begin{itemize}
+\item Tests en mémoire partagée sur 4 Intel Xeon X7560 totalisant 32 coeurs
+\item Matrices de taille: $64 \times k \times 64$
+\item Comparaison avec Intel MKL
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparaison}
+\framesubtitle{Résultats CARMA}
+\begin{center}
+\colorbox{white}{\includegraphics[scale=0.9]{CARMA.png}}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Plus sur le sujet}
+\framesubtitle{Algorithmes}
+\begin{itemize}
+\item \textit{Funnelsort}
+\item Parcours de séquences (map, filter, etc...)
+\item Calcul matriciel
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Plus sur le sujet}
+\framesubtitle{Structures de données}
+\begin{itemize}
+\item Liste déroulée
+\item Arbre de van Emde Boas
+\item Matrices récursives
+\end{itemize}
 \end{frame}
 
 \section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
 \begin{itemize}
-\item Les meilleures performances proviennent souvent d'un programme conscient de la cache.
+\item La cohérence des caches d'un système est assuré par le matériel.
 \item<2-> Une façon d'exploiter la localité est d'utiliser des algorithmes et des structures de données insensibles à la cache.
 \item<3-> Les algorithmes insensibles à la cache offrent des opportunités de parallélisation.
 \end{itemize}

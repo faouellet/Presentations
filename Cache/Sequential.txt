@@ -122,7 +122,3 @@ N: 992
 Normal. Ecoule: 2043145240 us.
 Transpose. Ecoule: 823937440 us.
 CO. Ecoule: 711053560 us.
-N: 1024
-Normal. Ecoule: 6972857480 us.
-Transpose. Ecoule: 900096720 us.
-CO. Ecoule: 1047081840 us.

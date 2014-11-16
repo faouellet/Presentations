@@ -1,0 +1,128 @@
+N: 32
+Normal. Ecoule: 30840 us.
+Transpose. Ecoule: 30360 us.
+CO. Ecoule: 26760 us.
+N: 64
+Normal. Ecoule: 251680 us.
+Transpose. Ecoule: 220960 us.
+CO. Ecoule: 181160 us.
+N: 96
+Normal. Ecoule: 738400 us.
+Transpose. Ecoule: 735600 us.
+CO. Ecoule: 618120 us.
+N: 128
+Normal. Ecoule: 1805240 us.
+Transpose. Ecoule: 1696920 us.
+CO. Ecoule: 1450480 us.
+N: 160
+Normal. Ecoule: 3468360 us.
+Transpose. Ecoule: 3362480 us.
+CO. Ecoule: 2852320 us.
+N: 192
+Normal. Ecoule: 6514560 us.
+Transpose. Ecoule: 5669560 us.
+CO. Ecoule: 4939480 us.
+N: 224
+Normal. Ecoule: 12161760 us.
+Transpose. Ecoule: 8997560 us.
+CO. Ecoule: 8233440 us.
+N: 256
+Normal. Ecoule: 26352920 us.
+Transpose. Ecoule: 13443120 us.
+CO. Ecoule: 13848280 us.
+N: 288
+Normal. Ecoule: 26127360 us.
+Transpose. Ecoule: 19155200 us.
+CO. Ecoule: 16942840 us.
+N: 320
+Normal. Ecoule: 38852560 us.
+Transpose. Ecoule: 26517640 us.
+CO. Ecoule: 23512400 us.
+N: 352
+Normal. Ecoule: 47694960 us.
+Transpose. Ecoule: 35329880 us.
+CO. Ecoule: 32332440 us.
+N: 384
+Normal. Ecoule: 80264120 us.
+Transpose. Ecoule: 45811800 us.
+CO. Ecoule: 43234640 us.
+N: 416
+Normal. Ecoule: 78809880 us.
+Transpose. Ecoule: 58204720 us.
+CO. Ecoule: 52298000 us.
+N: 448
+Normal. Ecoule: 106674840 us.
+Transpose. Ecoule: 72818640 us.
+CO. Ecoule: 66887080 us.
+N: 480
+Normal. Ecoule: 121844920 us.
+Transpose. Ecoule: 89513160 us.
+CO. Ecoule: 80494160 us.
+N: 512
+Normal. Ecoule: 285378800 us.
+Transpose. Ecoule: 108008680 us.
+CO. Ecoule: 130270640 us.
+N: 544
+Normal. Ecoule: 176419800 us.
+Transpose. Ecoule: 130347040 us.
+CO. Ecoule: 119564520 us.
+N: 576
+Normal. Ecoule: 268325800 us.
+Transpose. Ecoule: 154613240 us.
+CO. Ecoule: 138046160 us.
+N: 608
+Normal. Ecoule: 246604440 us.
+Transpose. Ecoule: 181877880 us.
+CO. Ecoule: 163405400 us.
+N: 640
+Normal. Ecoule: 389760760 us.
+Transpose. Ecoule: 212175400 us.
+CO. Ecoule: 192378200 us.
+N: 672
+Normal. Ecoule: 335549720 us.
+Transpose. Ecoule: 246127120 us.
+CO. Ecoule: 223886200 us.
+N: 704
+Normal. Ecoule: 679073400 us.
+Transpose. Ecoule: 284497240 us.
+CO. Ecoule: 265053280 us.
+N: 736
+Normal. Ecoule: 686089320 us.
+Transpose. Ecoule: 325327600 us.
+CO. Ecoule: 295298880 us.
+N: 768
+Normal. Ecoule: 1322999920 us.
+Transpose. Ecoule: 370126560 us.
+CO. Ecoule: 349651840 us.
+N: 800
+Normal. Ecoule: 736187600 us.
+Transpose. Ecoule: 419984320 us.
+CO. Ecoule: 373611120 us.
+N: 832
+Normal. Ecoule: 1389353440 us.
+Transpose. Ecoule: 475951240 us.
+CO. Ecoule: 430242320 us.
+N: 864
+Normal. Ecoule: 1433385200 us.
+Transpose. Ecoule: 536247000 us.
+CO. Ecoule: 503423320 us.
+N: 896
+Normal. Ecoule: 1704806480 us.
+Transpose. Ecoule: 671399320 us.
+CO. Ecoule: 583964880 us.
+N: 928
+Normal. Ecoule: 1531231440 us.
+Transpose. Ecoule: 706857280 us.
+CO. Ecoule: 598552840 us.
+N: 960
+Normal. Ecoule: 2007916640 us.
+Transpose. Ecoule: 763117160 us.
+CO. Ecoule: 662473280 us.
+N: 992
+Normal. Ecoule: 2043145240 us.
+Transpose. Ecoule: 823937440 us.
+CO. Ecoule: 711053560 us.
+N: 1024
+Normal. Ecoule: 6972857480 us.
+Transpose. Ecoule: 900096720 us.
+CO. Ecoule: 1047081840 us.

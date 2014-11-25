@@ -72,18 +72,18 @@
 \section{Motivation}
 \begin{frame}
 \frametitle{L'ère du parallélisme}
-
+\colorbox{white}{\includegraphics[scale=0.48]{parallel.png}}
 \end{frame}
 
 \begin{frame}
 \frametitle{Problèmes courants}
-\framesubtitle{Optimisations des boucles}
-Les compilateurs modernes sont très loin derrière la théorie
+\framesubtitle{Rendre le parallélisme accessible}
+On cherche toujours les meilleures abstractions pour le calcul parallèle
 \begin{itemize}
-\item Fusion
-\item Tuilage
-\item \textit{Skewing}
-\item Etc...
+\item \textit{Threads}
+\item Tâches
+\item Langages dédiés
+\item Parallélisme implicite
 \end{itemize}
 \end{frame}
 
@@ -100,11 +100,12 @@ Comment améliorer la performance de \textit{legacy code}?
 
 \begin{frame}
 \frametitle{Problèmes courants}
-\framesubtitle{Rendre le parallélisme accessible}
-On cherche toujours les meilleures abstractions pour le calcul parallèle
+\framesubtitle{Compilateurs}
+Les compilateurs modernes ont beaucoup de difficulté à extraire du parallélisme d'applications écrites de façon séquentielles
 \begin{itemize}
-\item \textit{Threads}
-\item Tâches
+\item Problèmes théoriques très difficile à résoudre
+\item Aucun succès majeur jusqu'à maintenant
+\item Les compilateurs modernes manquent d'outils pour la tâche
 \end{itemize}
 \end{frame}
 

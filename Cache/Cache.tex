@@ -177,6 +177,15 @@ Par exemple, 1 2 0 0 donne:
 \section{Fonctionnement de la cache}
 \subsection{Concepts de base}
 \begin{frame}
+\frametitle{Accès à la mémoire}
+\begin{itemize}
+\item En général, les processeurs ne peuvent accéder directement à la mémoire
+\item Les accès mémoire se font au travers d'une hiérarchie de caches
+\item Les lectures se font par blocs (\textit{cache lines})
+\end{itemize}
+\end{frame}
+
+\begin{frame}
 \frametitle{Cache}
 \framesubtitle{Illustration}
 \begin{columns}
@@ -207,15 +216,6 @@ Par exemple, 1 2 0 0 donne:
 \end{itemize}
     \end{column}
 \end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{Accès à la mémoire}
-\begin{itemize}
-\item En général, les processeurs ne peuvent accéder directement à la mémoire
-\item Les accès mémoire se font au travers d'une hiérarchie de caches
-\item Les lectures se font par blocs (\textit{cache lines})
-\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -389,7 +389,7 @@ Deux grandes familles de protocole
 L'important à retenir est:
 \begin{enumerate}
 \item Pour écrire, un coeur doit obtenir un accès exclusif pour écrire dans une \textit{cache line}
-\item Pour lire, un coeur doit faire passer l'état d'une \textit{cache line} à l'état \textit{Modifié}
+\item Pour lire, un coeur doit faire passer l'état d'une \textit{cache line} à l'état \textit{Partagé}
 \end{enumerate}
 
 \only<2>{
@@ -632,6 +632,7 @@ A1xB1 + A2xB3
 \framesubtitle{Mise en contexte}
 \begin{itemize}
 \item Test séquentiel
+\item Matrices de taille $N \times N$
 \item Processeur: Intel Core i5-4670
 \item Compilateur: g++ 4.8.3
 \item Option d'optimisation: -O2

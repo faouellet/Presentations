@@ -1,73 +1,18 @@
+#include <functional>
 #include <iostream>
-
-template<size_t N, size_t Div3, size_t Div5>
-struct FizzBuzz
-{
-	static void print()
-	{
-		std::cout << N << std::endl;
-		FizzBuzz<N-1, (N-1)%3, (N-1)%5>::print();
-	}
-};
-
-template<size_t N>
-struct FizzBuzz<N, 0, 0>
-{
-	static void print()
-	{
-		std::cout << "FizzBuzz" << std::endl;
-		FizzBuzz<N-1, (N-1)%3, (N-1)%5>::print();
-	}
-};
-
-template<size_t N, size_t Div3>
-struct FizzBuzz<N, Div3, 0>
-{
-	static void print()
-	{
-		std::cout << "Buzz" << std::endl;
-		FizzBuzz<N-1, (N-1)%3, (N-1)%5>::print();
-	}
-};
-
-template<size_t N, size_t Div5>
-struct FizzBuzz<N, 0, Div5>
-{
-	static void print()
-	{
-		std::cout << "Fizz" << std::endl;
-		FizzBuzz<N-1, (N-1)%3, (N-1)%5>::print();
-	}
-};
-
-template<size_t Div3, size_t Div5>
-struct FizzBuzz<0, Div3, Div5>
-{
-	static void print()
-	{
-		std::cout << 0 << std::endl;
-	}
-};
-
-template<>
-struct FizzBuzz<0, 0, 0>
-{
-	static void print()
-	{
-		std::cout << 0 << std::endl;
-	}
-};
-
-template<size_t N>
-struct RunFizzBuzz
-{
-    static void print()
-    {
-        FizzBuzz<N, N%3, N%5>::print();
-    }
-};
+#include <map>
 
 int main()
 {
-	RunFizzBuzz<100>::print(); 
+    std::function<int(int)> fibonacci = [&](int i) mutable
+    {
+        static std::map<int, int> cache = { {0,0}, {1,1} };
+
+        if (cache.find(i) == cache.end())
+            cache[i] = fibonacci(i - 1) + fibonacci(i - 2);
+
+        return cache[i];
+    };
+
+    std::cout << "10th Fibonacci number: " << fibonacci(10) << std::endl;
 }

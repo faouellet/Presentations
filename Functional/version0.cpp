@@ -1,18 +1,14 @@
 #include <iostream>
 
-int main()
+int fibonacci(int i)
 {
-    for (int i = 0; i < 100; ++i)
-    {
-        if ((i % 3 == 0) && (i % 5 == 0))
-            std::cout << "FizzBuzz";
-        else if (i % 3 == 0)
-            std::cout << "Fizz";
-        else if (i % 5 == 0)
-            std::cout << "Buzz";
-        else
-            std::cout << i;
+    if (i < 2)
+        return i;
 
-        std::cout << std::endl;
-    }
+    return fibonacci(i - 1) + fibonacci(i - 2);
 }
+
+/*int main()
+{
+    std::cout << "10th Fibonacci number: " << fibonacci(10) << std::endl;
+}*/

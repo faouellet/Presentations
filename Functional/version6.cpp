@@ -1,59 +1,18 @@
+#include <functional>
 #include <iostream>
-#include <iterator>
-#include <type_traits>
 
-template <class T>
-class FibonacciIterator : public std::iterator<std::input_iterator_tag, T> {
-public:
-  FibonacciIterator() {
-    static_assert(std::is_integral<T>::value, "Integral type required");
-    mCurrent = 0;
-    mFirst = 0;
-    mSecond = 1;
-  }
-
-  T operator*() const { return mCurrent; }
-
-  FibonacciIterator &operator++() {
-    mCurrent = mFirst + mSecond;
-    mFirst = mSecond;
-    mSecond = mCurrent;
-    return *this;
-  }
-
-  FibonacciIterator& operator++(int)
-  {
-      auto temp = *this;
-      operator++();
-      return *this;
-  }
-
-  bool operator==(const FibonacciIterator &fIt) const {
-    return mFirst == fIt.mFirst && 
-           mSecond == fIt.mSecond &&
-           mCurrent == fIt.mCurrent;
-  }
-
-  bool operator!=(const FibonacciIterator &fIt) const {
-    return !(*this == fIt);
-  }
-
-  bool operator<(const FibonacciIterator &fIt) const {
-    return mFirst < fIt.mFirst && 
-           mSecond < fIt.mSecond &&
-           mCurrent < fIt.mCurrent;
-  }
-
-private:
-  T mFirst;
-  T mSecond;
-  T mCurrent;
-};
+template <class L1, class L2> auto operator|(L1 l1, L2 l2) {
+  return [l1, l2](auto... x) { return l1(l2(x...)); };
+}
 
 int main() {
-  FibonacciIterator<int> fib;
-  for (int i = 0; i < 10; ++i) {
-    std::cout << "Term " << i << " of the Fibonacci series: " << *(++fib)
-              << std::endl;
-  }
+  auto sqr = [](int x) { return x * x; };
+  std::function<int(int)> fibonacci = [&](int i) {
+    if (i < 2)
+      return i;
+
+    return fibonacci(i - 1) + fibonacci(i - 2);
+  };
+
+  std::cout << sqr(fibonacci(10)) << std::endl;
 }

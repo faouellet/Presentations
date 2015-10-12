@@ -1,12 +1,19 @@
 #include <iostream>
 
-constexpr int sqr(int val) { return val * val; }
+template <int Val> struct Sqr {
+  static const int value = Val * Val;
+};
 
-constexpr int fibonacci(int i) {
-  if (i < 2)
-    return i;
+template <int Val> struct Fib {
+  static const int value = Fib<Val - 1>::value + Fib<Val - 2>::value;
+};
 
-  return fibonacci(i - 1) + fibonacci(i - 2);
-}
+template <> struct Fib<0> {
+  static const int value = 0;
+};
 
-int main() { std::cout << sqr(fibonacci(10)) << std::endl; }
+template <> struct Fib<1> {
+  static const int value = 1;
+};
+
+int main() { std::cout << Sqr<Fib<10>::value>::value << std::endl; }

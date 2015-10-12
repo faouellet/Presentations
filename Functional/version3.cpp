@@ -1,30 +1,15 @@
 #include <iostream>
 
-template <int Val>
-struct Sqr
-{
-    static const int value = Val * Val;
-};
+int main() {
+  auto fibonacci = [ current = 0, first = 0, second = 1 ]() mutable {
+    current = first + second;
+    first = second;
+    second = current;
+    return current;
+  };
 
-template <int Val>
-struct Fib
-{
-    static const int value = Fib<Val - 1>::value + Fib<Val - 2>::value;
-};
+  for (int i = 0; i < 10; ++i)
+    std::cout << "Fibonacci number: " << fibonacci() << std::endl;
 
-template <>
-struct Fib<0>
-{
-    static const int value = 0;
-};
-
-template <>
-struct Fib<1>
-{
-    static const int value = 1;
-};
-
-/*int main()
-{
-    std::cout << Sqr<Fib<10>::value>::value << std::endl;
-}*/
+  return 0;
+}

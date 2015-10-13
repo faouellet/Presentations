@@ -37,10 +37,6 @@ private:
   T mCurrentVal;
 };
 
-template <class L1, class L2> auto operator|(L1 l1, L2 l2) {
-  return [&]() { return l2(l1()); };
-}
-
 template <class F, class T = typename std::result_of<F()>::type>
 auto make_generator(F &&f) {
   return GeneratorIterator<T, F>(f);
@@ -54,11 +50,10 @@ int main() {
     return current;
   };
   auto sqr = [](int x) { return x * x; };
-  auto func = fibonacci | sqr;
+  auto func = [&]() { return sqr(fibonacci()); };
 
   auto gen = make_generator(func);
   for (int i = 0; i < 10; ++i) {
-    std::cout << "Term " << i
-              << " of the squared Fibonacci series: " << *(++gen) << std::endl;
+    std::cout << *(++gen) << std::endl;
   }
 }

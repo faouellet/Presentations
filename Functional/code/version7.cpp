@@ -24,7 +24,7 @@ public:
   FibonacciIterator &operator++(int) {
     auto temp = *this;
     operator++();
-    return *this;
+    return temp;
   }
 
   bool operator==(const FibonacciIterator &fIt) const {

@@ -1,10 +1,10 @@
 #include <functional>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 int main() {
   std::function<int(int)> fibonacci = [&](int i) mutable {
-    static std::map<int, int> cache = { { 0, 0 }, { 1, 1 } };
+    static std::unordered_map<int, int> cache = { { 0, 0 }, { 1, 1 } };
 
     if (cache.find(i) == cache.end())
       cache[i] = fibonacci(i - 1) + fibonacci(i - 2);

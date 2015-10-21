@@ -2,55 +2,58 @@
 #include <iterator>
 #include <type_traits>
 
-template <class T>
-class FibonacciIterator : public std::iterator<std::input_iterator_tag, T> {
+template <class T, class F>
+class GeneratorIterator : public std::iterator<std::input_iterator_tag, T> {
 public:
-  FibonacciIterator() {
-    static_assert(std::is_integral<T>::value, "Integral type required");
-    mCurrent = 0;
-    mFirst = 0;
-    mSecond = 1;
-  }
+  explicit GeneratorIterator(F &&f) : mFunc{ f }, mCurrentVal{ T{} } {}
 
-  T operator*() const { return mCurrent; }
+  T operator*() const { return mCurrentVal; }
 
-  FibonacciIterator &operator++() {
-    mCurrent = mFirst + mSecond;
-    mFirst = mSecond;
-    mSecond = mCurrent;
+  GeneratorIterator &operator++() {
+    mCurrentVal = mFunc();
     return *this;
   }
 
-  FibonacciIterator &operator++(int) {
+  GeneratorIterator &operator++(int) {
     auto temp = *this;
     operator++();
-    return temp;
+    return *this;
   }
 
-  bool operator==(const FibonacciIterator &fIt) const {
-    return mFirst == fIt.mFirst && mSecond == fIt.mSecond &&
-           mCurrent == fIt.mCurrent;
+  bool operator==(const GeneratorIterator &fIt) const {
+    return mCurrentVal == fIt.mCurrentVal && mFunc == fIt.mFunc;
   }
 
-  bool operator!=(const FibonacciIterator &fIt) const {
+  bool operator!=(const GeneratorIterator &fIt) const {
     return !(*this == fIt);
   }
 
-  bool operator<(const FibonacciIterator &fIt) const {
-    return mFirst < fIt.mFirst && mSecond < fIt.mSecond &&
-           mCurrent < fIt.mCurrent;
+  bool operator<(const GeneratorIterator &fIt) const {
+    return mCurrentVal < fIt.mCurrentVal;
   }
 
 private:
-  T mFirst;
-  T mSecond;
-  T mCurrent;
+  F mFunc;
+  T mCurrentVal;
 };
 
+template <class F, class T = typename std::result_of<F()>::type>
+auto make_generator(F &&f) {
+  return GeneratorIterator<T, F>(f);
+}
+
 int main() {
-  FibonacciIterator<int> fib;
+  auto fibonacci = [ current = 0, first = 0, second = 1 ]() mutable {
+    current = first + second;
+    first = second;
+    second = current;
+    return current;
+  };
+  auto sqr = [](int x) { return x * x; };
+  auto func = [&]() { return sqr(fibonacci()); };
+
+  auto gen = make_generator(func);
   for (int i = 0; i < 10; ++i) {
-    std::cout << "Term " << i << " of the Fibonacci series: " << *(++fib)
-              << std::endl;
+    std::cout << *(++gen) << std::endl;
   }
 }
